@@ -1,0 +1,436 @@
+<title>Clawd Sprite Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #e7eaed;
+    --surface: #f6f7f8;
+    --ink: #1b1f24;
+    --muted: #5d6671;
+    --line: #cfd5db;
+    --accent: #c4613f;
+    --accent-soft: #f1d5c9;
+    --check-a: #dfe3e7;
+    --check-b: #f4f6f7;
+    --notch: #050505;
+    --popup: #0f1c21;
+    --focus: #2f6fd6;
+    --display: "Silkscreen", "Monocraft", ui-monospace, monospace;
+    --body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #111317;
+      --surface: #191c21;
+      --ink: #e5e8eb;
+      --muted: #8d96a0;
+      --line: #2b3038;
+      --accent: #e08466;
+      --accent-soft: #3a2620;
+      --check-a: #1d2026;
+      --check-b: #252930;
+      --focus: #6f9ff0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #111317;
+    --surface: #191c21;
+    --ink: #e5e8eb;
+    --muted: #8d96a0;
+    --line: #2b3038;
+    --accent: #e08466;
+    --accent-soft: #3a2620;
+    --check-a: #1d2026;
+    --check-b: #252930;
+    --focus: #6f9ff0;
+  }
+
+  body { background: var(--ground); color: var(--ink); font: 15px/1.5 var(--body); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 56px; display: grid; gap: 28px; }
+  h1, h2 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; }
+  h1 { font-size: 28px; letter-spacing: 0.02em; }
+  h2 { font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .mono { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+  header p { margin: 4px 0 0; max-width: 60ch; }
+  canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; max-width: 100%; }
+  section { display: grid; gap: 14px; }
+
+  /* Tailles réelles */
+  .contexts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .ctx { display: grid; gap: 8px; }
+  .notch { background: var(--notch); height: 38px; border-radius: 0 0 14px 14px; display: flex; align-items: center; justify-content: space-between; padding-inline: 16px; }
+  .notch .donut { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #2a2a2a; border-top-color: #4ccf7a; }
+  .notch .time { font-family: var(--display); color: #f2f2f2; font-size: 13px; margin-left: 8px; margin-right: auto; }
+  .popup { background: radial-gradient(120% 140% at 50% 0%, #17313a, var(--popup)); height: 110px; border-radius: 18px; display: grid; place-items: center; }
+
+  /* Banc */
+  .bench { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; }
+  @media (max-width: 760px) { .bench { grid-template-columns: 1fr; } }
+  .stage { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; }
+  .viewport { display: grid; place-items: center; border-radius: 6px; overflow: hidden; padding: 18px; }
+  .viewport[data-bg="checker"] { background: repeating-conic-gradient(var(--check-a) 0% 25%, var(--check-b) 0% 50%) 0 0 / 16px 16px; }
+  .viewport[data-bg="notch"] { background: var(--notch); }
+  .viewport[data-bg="popup"] { background: var(--popup); }
+  .readout { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; min-height: 20px; }
+  .swatch-inline { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; border: 1px solid var(--line); }
+
+  .panel { display: grid; gap: 16px; }
+  .group { display: grid; gap: 6px; }
+  .group > .label { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  button, .chip { font: 500 13px/1 var(--body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .transport { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+  .toggle input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+  /* Pellicule */
+  .strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+  .cell { flex: none; display: grid; gap: 6px; justify-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 10px 8px; cursor: pointer; }
+  .cell[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .cell .thumb { background: repeating-conic-gradient(var(--check-a) 0% 25%, var(--check-b) 0% 50%) 0 0 / 8px 8px; border-radius: 4px; }
+  .cell span { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+  .moods { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+  .moods .cell { width: auto; }
+
+  .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .badge { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .badge .live { background: var(--notch); border-radius: 6px; display: flex; align-items: end; justify-content: center; gap: 18px; padding: 14px 10px 10px; }
+  .badge .frames { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge .frames canvas { background: repeating-conic-gradient(var(--check-a) 0% 25%, var(--check-b) 0% 50%) 0 0 / 8px 8px; border-radius: 3px; }
+
+  .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .pal { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .pal .sw { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--line); background: repeating-conic-gradient(var(--check-a) 0% 25%, var(--check-b) 0% 50%) 0 0 / 8px 8px; position: relative; overflow: hidden; }
+  .pal .sw i { position: absolute; inset: 0; }
+  .pal b { font-family: var(--display); font-weight: 400; font-size: 16px; width: 14px; }
+
+  footer { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 4px; }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Clawd Sprite Bench</h1>
+      <p class="muted">Les sprites de l'avatar du notch, tirés directement du code Swift. Canevas 16 × 16, affichés sans lissage.</p>
+    </div>
+    <span class="mono muted" id="stamp"></span>
+  </header>
+
+  <section aria-labelledby="h-ctx">
+    <h2 id="h-ctx">Taille réelle</h2>
+    <div class="contexts">
+      <div class="ctx">
+        <div class="notch"><span class="donut"></span><span class="time">18:30</span><canvas id="ctx-notch"></canvas></div>
+        <span class="mono muted">notch · ×1 · 16 pt</span>
+      </div>
+      <div class="ctx">
+        <div class="popup"><canvas id="ctx-popup"></canvas></div>
+        <span class="mono muted">popup · ×2 · 32 pt</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-bench">
+    <h2 id="h-bench">Banc d'animation</h2>
+    <div class="bench">
+      <div class="stage">
+        <div class="viewport" id="viewport" data-bg="checker"><canvas id="big"></canvas></div>
+        <div class="readout mono">
+          <span id="frame-info"></span>
+          <span id="pixel-info" class="muted">Survole un pixel pour voir sa lettre</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="group">
+          <span class="label">Clip</span>
+          <div class="chips" id="clips"></div>
+        </div>
+        <div class="group">
+          <span class="label">Lecture</span>
+          <div class="transport">
+            <button id="prev" aria-label="Image précédente">◀ Image</button>
+            <button id="play">Lecture</button>
+            <button id="next" aria-label="Image suivante">Image ▶</button>
+          </div>
+        </div>
+        <div class="group">
+          <span class="label">Vitesse</span>
+          <div class="chips" id="speeds"></div>
+        </div>
+        <div class="group">
+          <label class="label" for="zoom">Zoom <span class="mono" id="zoom-val"></span></label>
+          <input type="range" id="zoom" min="4" max="28" step="1" value="18">
+        </div>
+        <div class="group">
+          <span class="label">Fond</span>
+          <div class="chips" id="bgs"></div>
+        </div>
+        <div class="group">
+          <label class="toggle"><input type="checkbox" id="loop" checked> Boucler l'aperçu</label>
+          <label class="toggle"><input type="checkbox" id="grid" checked> Grille</label>
+          <label class="toggle"><input type="checkbox" id="onion"> Pelure d'oignon (image précédente)</label>
+          <label class="toggle"><input type="checkbox" id="shadow" checked> Ombre au sol</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-strip">
+    <h2 id="h-strip">Pellicule</h2>
+    <div class="strip" id="strip"></div>
+  </section>
+
+  <section aria-labelledby="h-moods">
+    <h2 id="h-moods">Repos par humeur</h2>
+    <div class="moods" id="moods"></div>
+  </section>
+
+  <section aria-labelledby="h-badges">
+    <h2 id="h-badges">Badges</h2>
+    <div class="badges" id="badges"></div>
+  </section>
+
+  <section aria-labelledby="h-pal">
+    <h2 id="h-pal">Palette</h2>
+    <div class="palette" id="palette"></div>
+  </section>
+
+  <footer class="muted">
+    <span>Régénérer après une modif des sprites : <code>./scripts/sprite-viewer.sh</code></span>
+    <span>Source : <code>Sources/Clawdio/UI/Avatar/Sprites/</code> · export : <code>Clawdio --export-sprites</code></span>
+  </footer>
+</div>
+
+<script>
+const DATA = /*SPRITES_JSON*/null;
+
+(() => {
+  if (!DATA) { document.querySelector(".wrap").insertAdjacentHTML("beforeend", "<p>Aucune donnée : lance <code>./scripts/sprite-viewer.sh</code>.</p>"); return; }
+  const N = DATA.size;
+  const $ = (id) => document.getElementById(id);
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const moodNames = {
+    idle: "repos", waiting: "attend", attention: "autorisation", pushing: "naissance",
+    "working.think": "réfléchit", "working.read": "lit", "working.write": "écrit",
+    "working.run": "lance une commande", "working.web": "cherche sur le web", "working.delegate": "délègue",
+  };
+
+  // Couleur → lettre de palette, pour la lecture au survol.
+  const keyOf = Object.fromEntries(DATA.palette.map((p) => [p.hex, p.key]));
+  const rgba = (hex) => `rgba(${parseInt(hex.slice(0, 2), 16)},${parseInt(hex.slice(2, 4), 16)},${parseInt(hex.slice(4, 6), 16)},${parseInt(hex.slice(6, 8), 16) / 255})`;
+
+  const pref = (k, d) => { try { return localStorage.getItem("bench." + k) ?? d; } catch { return d; } };
+  const save = (k, v) => { try { localStorage.setItem("bench." + k, v); } catch {} };
+
+  const state = {
+    clip: 0, tick: 0, playing: !reduceMotion, speed: 1,
+    zoom: Number(pref("zoom", 18)), bg: pref("bg", "checker"),
+  };
+
+  function drawImage(ctx, id, s, ox = 0, oy = 0, alpha = 1) {
+    const img = DATA.images[id];
+    ctx.globalAlpha = alpha;
+    img.px.forEach((row, y) => row.forEach((c, x) => {
+      if (!c) return;
+      ctx.fillStyle = rgba(c);
+      ctx.fillRect((x + ox) * s, (y + oy) * s, s, s);
+    }));
+    ctx.globalAlpha = 1;
+  }
+
+  /// Canevas à la taille CSS voulue, résolution physique de l'écran (pixels nets au zoom entier).
+  function sized(canvas, cssW, cssH) {
+    const dpr = Math.max(1, Math.round(window.devicePixelRatio || 1));
+    canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+    canvas.style.width = cssW + "px"; canvas.style.height = cssH + "px";
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    return ctx;
+  }
+
+  /// Une image complète : ombre fixe + corps décalé (même logique que `AvatarCanvas`).
+  function drawFrame(canvas, frame, s, { pad = 0, shadow = true, onion = null } = {}) {
+    const ctx = sized(canvas, (N + pad * 2) * s, (N + pad * 2) * s);
+    if (shadow) drawImage(ctx, DATA.shadow, s, pad, pad);
+    if (onion) drawImage(ctx, onion.image, s, pad + onion.dx, pad + onion.dy, 0.28);
+    drawImage(ctx, frame.image, s, pad + frame.dx, pad + frame.dy);
+    return ctx;
+  }
+
+  const clip = () => DATA.clips[state.clip];
+  const ticks = (c) => c.frames.reduce((a, f) => a + f.hold, 0);
+  function frameAt(c, tick) {
+    let t = tick;
+    for (let i = 0; i < c.frames.length; i++) { if (t < c.frames[i].hold) return i; t -= c.frames[i].hold; }
+    return c.frames.length - 1;
+  }
+  const startTick = (i) => clip().frames.slice(0, i).reduce((a, f) => a + f.hold, 0);
+
+  // --- Rendu du banc
+  const PAD = 3; // marge autour du canevas : place pour les sauts et décalages
+  function renderBench() {
+    const c = clip(), i = frameAt(c, state.tick), f = c.frames[i];
+    const onion = $("onion").checked && i > 0 ? c.frames[i - 1] : null;
+    const ctx = drawFrame($("big"), f, state.zoom, { pad: PAD, shadow: $("shadow").checked, onion });
+    if ($("grid").checked) {
+      const s = state.zoom, total = (N + PAD * 2) * s;
+      ctx.strokeStyle = state.bg === "checker" ? "rgba(0,0,0,.12)" : "rgba(255,255,255,.1)";
+      ctx.lineWidth = 1 / Math.max(1, Math.round(devicePixelRatio || 1));
+      ctx.beginPath();
+      for (let k = 0; k <= N + PAD * 2; k++) { ctx.moveTo(k * s, 0); ctx.lineTo(k * s, total); ctx.moveTo(0, k * s); ctx.lineTo(total, k * s); }
+      ctx.stroke();
+      // Cadre du canevas 16 × 16 réel.
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent");
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(PAD * s, PAD * s, N * s, N * s);
+    }
+    $("frame-info").textContent = `${c.name} · image ${i + 1}/${c.frames.length} · ×${f.hold} · dx ${f.dx} dy ${f.dy} · tick ${state.tick % ticks(c)}/${ticks(c)}`;
+    document.querySelectorAll("#strip .cell").forEach((el, k) => el.setAttribute("aria-current", String(k === i)));
+    drawFrame($("ctx-notch"), f, 1);
+    drawFrame($("ctx-popup"), f, 2);
+  }
+
+  function renderStrip() {
+    const strip = $("strip"); strip.innerHTML = "";
+    clip().frames.forEach((f, i) => {
+      const cell = document.createElement("button");
+      cell.className = "cell"; cell.type = "button";
+      cell.setAttribute("aria-label", `Aller à l'image ${i + 1}`);
+      const cv = document.createElement("canvas"); cv.className = "thumb";
+      drawFrame(cv, f, 5, { pad: 2 });
+      const cap = document.createElement("span");
+      cap.textContent = `${i + 1} · ×${f.hold}${f.dx || f.dy ? ` · ${f.dx},${f.dy}` : ""}`;
+      cell.append(cv, cap);
+      cell.onclick = () => { state.playing = false; state.tick = startTick(i); syncPlay(); renderBench(); };
+      strip.append(cell);
+    });
+  }
+
+  // --- Contrôles
+  function chips(container, items, isOn, onPick) {
+    const el = $(container); el.innerHTML = "";
+    items.forEach((it) => {
+      const b = document.createElement("button"); b.type = "button";
+      b.textContent = it.label; b.setAttribute("aria-pressed", String(isOn(it)));
+      b.onclick = () => { onPick(it); chips(container, items, isOn, onPick); };
+      el.append(b);
+    });
+  }
+  const clipItems = DATA.clips.map((c, i) => ({ label: `${c.name} · ${c.duration.toFixed(2)} s`, i }));
+  chips("clips", clipItems, (it) => it.i === state.clip, (it) => { state.clip = it.i; state.tick = 0; renderStrip(); renderBench(); });
+  chips("speeds", [0.25, 0.5, 1, 2].map((v) => ({ label: `${v}×`, v })), (it) => it.v === state.speed, (it) => { state.speed = it.v; });
+  const bgItems = [{ label: "Damier", v: "checker" }, { label: "Notch", v: "notch" }, { label: "Popup", v: "popup" }];
+  chips("bgs", bgItems, (it) => it.v === state.bg, (it) => { state.bg = it.v; save("bg", it.v); $("viewport").dataset.bg = it.v; renderBench(); });
+  $("viewport").dataset.bg = state.bg;
+
+  const syncPlay = () => { $("play").textContent = state.playing ? "Pause" : "Lecture"; };
+  $("play").onclick = () => { state.playing = !state.playing; if (state.playing && !$("loop").checked && state.tick >= ticks(clip()) - 1) state.tick = 0; syncPlay(); };
+  const step = (d) => {
+    state.playing = false; syncPlay();
+    const c = clip(), n = c.frames.length, i = (frameAt(c, state.tick) + d + n) % n;
+    state.tick = startTick(i); renderBench();
+  };
+  $("prev").onclick = () => step(-1);
+  $("next").onclick = () => step(1);
+  $("zoom").value = state.zoom; $("zoom-val").textContent = `×${state.zoom}`;
+  $("zoom").oninput = (e) => { state.zoom = Number(e.target.value); save("zoom", state.zoom); $("zoom-val").textContent = `×${state.zoom}`; renderBench(); };
+  ["grid", "onion", "shadow"].forEach((id) => $(id).onchange = renderBench);
+  addEventListener("keydown", (e) => {
+    if (e.target.closest("input")) return;
+    if (e.key === " ") { e.preventDefault(); $("play").click(); }
+    if (e.key === "ArrowLeft") step(-1);
+    if (e.key === "ArrowRight") step(1);
+  });
+
+  // Lecture au survol : coordonnées dans le canevas 16 × 16 + lettre de palette.
+  $("big").addEventListener("mousemove", (e) => {
+    const r = e.target.getBoundingClientRect(), s = state.zoom;
+    const c = clip(), f = c.frames[frameAt(c, state.tick)];
+    const x = Math.floor((e.clientX - r.left) / s) - PAD - f.dx, y = Math.floor((e.clientY - r.top) / s) - PAD - f.dy;
+    const px = DATA.images[f.image].px[y]?.[x];
+    const sx = x + f.dx, sy = y + f.dy;
+    const shadowPx = DATA.images[DATA.shadow].px[sy]?.[sx];
+    const hex = px || ($("shadow").checked ? shadowPx : "");
+    const inside = x >= 0 && y >= 0 && x < N && y < N;
+    $("pixel-info").innerHTML = inside
+      ? `x ${x} · y ${y} · ${hex ? `<span class="swatch-inline" style="background:${rgba(hex)}"></span> « ${keyOf[hex] ?? "?"} » #${hex.slice(0, 6)}` : "« . » transparent"}`
+      : "hors canevas";
+  });
+  $("big").addEventListener("mouseleave", () => { $("pixel-info").textContent = "Survole un pixel pour voir sa lettre"; });
+
+  // --- Humeurs & palette
+  Object.entries(DATA.rest).forEach(([mood, id]) => {
+    const cell = document.createElement("div"); cell.className = "cell";
+    const cv = document.createElement("canvas"); cv.className = "thumb";
+    drawFrame(cv, { image: id, dx: 0, dy: 0 }, 5, { pad: 1 });
+    const cap = document.createElement("span"); cap.textContent = moodNames[mood] ?? mood;
+    cell.append(cv, cap); $("moods").append(cell);
+  });
+  const roles = { K: "contour", H: "dessus de la tête", O: "orange Claude", S: "ombre propre", E: "yeux", s: "ombre au sol", Y: "étincelles", W: "bulle, reflet", D: "texte de bulle", B: "bulle d'alerte" };
+  DATA.palette.forEach((p) => {
+    $("palette").insertAdjacentHTML("beforeend",
+      `<div class="pal"><span class="sw"><i style="background:${rgba(p.hex)}"></i></span><b>${p.key}</b>
+       <div><div>${roles[p.key] ?? ""}</div><div class="mono muted">#${p.hex.slice(0, 6)}${p.hex.endsWith("ff") ? "" : ` · ${Math.round(parseInt(p.hex.slice(6), 16) / 2.55)} %`}</div></div></div>`);
+  });
+
+  // Badges : aperçu animé en boucle (×1 et ×2 sur fond de notch) + leurs images.
+  const badgeLive = [];
+  const B = DATA.badges;
+  const drawBadge = (canvas, f, s) => {
+    const ctx = sized(canvas, B.w * s, (B.h + 1) * s); // +1 ligne : place pour le rebond
+    drawImage(ctx, f.image, s, f.dx, f.dy + 1);
+  };
+  B.clips.forEach((c) => {
+    const card = document.createElement("div"); card.className = "badge";
+    const live = document.createElement("div"); live.className = "live";
+    const c1 = document.createElement("canvas"), c2 = document.createElement("canvas");
+    live.append(c1, c2);
+    const frames = document.createElement("div"); frames.className = "frames";
+    c.frames.forEach((f) => { const cv = document.createElement("canvas"); drawBadge(cv, f, 4); frames.append(cv); });
+    const cap = document.createElement("span"); cap.className = "mono muted";
+    cap.textContent = `${c.name} · ${c.fps} i/s · ${c.duration.toFixed(2)} s`;
+    card.append(live, frames, cap); $("badges").append(card);
+    badgeLive.push({ c, c1, c2 });
+  });
+  const drawBadges = (now) => badgeLive.forEach(({ c, c1, c2 }) => {
+    const total = ticks(c), gap = Math.round(c.fps * 1.2);
+    const tick = reduceMotion ? total - 1 : Math.floor(now / 1000 * c.fps) % (total + gap);
+    const f = c.frames[frameAt(c, Math.min(tick, total - 1))];
+    drawBadge(c1, f, 1); drawBadge(c2, f, 2);
+  });
+
+  $("stamp").textContent = `export ${new Date(DATA.exportedAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })} · ${DATA.clips.length} clip${DATA.clips.length > 1 ? "s" : ""}`;
+
+  // --- Boucle : avance au rythme du clip ; aperçu en boucle avec une courte pause entre deux passages.
+  let last = performance.now(), acc = 0;
+  function loop(now) {
+    const dt = (now - last) / 1000; last = now;
+    if (state.playing) {
+      const c = clip(), total = ticks(c);
+      acc += dt * c.fps * state.speed;
+      while (acc >= 1) {
+        acc -= 1;
+        if (state.tick < total - 1) state.tick++;
+        else if ($("loop").checked) state.tick = state.tick >= total - 1 + Math.round(c.fps * 0.6) ? 0 : state.tick + 1;
+        else { state.playing = false; syncPlay(); break; }
+      }
+      renderBench();
+    } else acc = 0;
+    drawBadges(now);
+    requestAnimationFrame(loop);
+  }
+  syncPlay(); renderStrip(); renderBench(); requestAnimationFrame(loop);
+})();
+</script>

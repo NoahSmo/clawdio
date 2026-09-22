@@ -1,0 +1,24 @@
+# Artefacts de build
+.build/
+build/
+dist/
+.swiftpm/
+*.xcodeproj/
+xcuserdata/
+DerivedData/
+
+# Généré par scripts/package.sh : contient un chemin absolu local et le sha256 du zip
+Casks/
+
+# macOS / éditeurs / outils locaux
+.DS_Store
+.idea/
+.vscode/
+.claude/
+.env
+
+# Sorties de profilage / captures de debug (--snapshot, traces) ; les images du README vivent dans docs/
+*.sample
+*.log
+*.png
+!docs/*.png
