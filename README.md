@@ -100,7 +100,7 @@ To stop the Keychain prompt on every build: `SIGN_IDENTITY="Apple Development: �
 - `./scripts/sprite-viewer.sh` builds `build/sprite-viewer.html`, a bench to step through the animations frame by frame;
 - `CLAWDIO_AUTOOPEN=1 CLAWDIO_TRACE=1 .build/release/Clawdio` opens the panel after 1.5 s and traces its animation into `/tmp/clawdio_trace.log` and `/tmp/clawdio_frames/` (`CLAWDIO_TRACE=cold` simulates a click with no prior hover).
 
-**Icon and README images**: `./scripts/make-icon.sh` and `./scripts/make-screenshot.sh` regenerate them from the real sprites and from sample data (Pillow required) — no real quota, cost or conversation ever ships in a screenshot.
+**Icon and README images**: `./scripts/make-icon.sh`, `./scripts/make-screenshot.sh` and `./scripts/make-social.sh` (the repo's social preview card) regenerate them from the real sprites and from sample data (Pillow required) — no real quota, cost or conversation ever ships in a screenshot.
 
 **Publish a release** (`gh` logged in, clean working tree):
 
