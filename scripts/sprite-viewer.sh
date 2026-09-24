@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Génère la page de visualisation des sprites de l'avatar (build/sprite-viewer.html) depuis le code Swift.
-# ./scripts/sprite-viewer.sh [sortie.html]
+# ./scripts/sprite-viewer.sh [sortie.html] [clawd|rocky|rockySuit]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -9,7 +9,7 @@ JSON="$(mktemp -t clawdio-sprites)"
 trap 'rm -f "$JSON"' EXIT
 
 swift build
-"$(swift build --show-bin-path)/Clawdio" --export-sprites "$JSON"
+"$(swift build --show-bin-path)/Clawdio" --export-sprites "$JSON" "${2:-clawd}"
 
 mkdir -p "$(dirname "$OUT")"
 python3 -c '

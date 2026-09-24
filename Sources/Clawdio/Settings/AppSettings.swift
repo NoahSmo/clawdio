@@ -57,6 +57,8 @@ final class AppSettings {
     private(set) var language: AppLanguage
     private(set) var popupStyle: PopupStyle
     private(set) var hoverStyle: HoverStyle
+    /// Personnage de l'avatar (notch et popup).
+    private(set) var avatar: AvatarCharacter
     /// Halo autour du notch (au lancement et tant qu'un agent attend).
     private(set) var haloEnabled: Bool
     private(set) var launchAtLogin: Bool
@@ -68,6 +70,7 @@ final class AppSettings {
         language = UserDefaults.standard.string(forKey: "clawdio.language").flatMap(AppLanguage.init(rawValue:)) ?? .system
         popupStyle = UserDefaults.standard.string(forKey: "clawdio.popupStyle").flatMap(PopupStyle.init(rawValue:)) ?? .glass
         hoverStyle = UserDefaults.standard.string(forKey: "clawdio.hoverStyle").flatMap(HoverStyle.init(rawValue:)) ?? .off
+        avatar = UserDefaults.standard.string(forKey: "clawdio.avatar").flatMap(AvatarCharacter.init(rawValue:)) ?? .clawd
         haloEnabled = UserDefaults.standard.object(forKey: "clawdio.halo") as? Bool ?? true
         launchAtLogin = SMAppService.mainApp.status == .enabled
         Fmt.locale = language.locale
@@ -76,6 +79,11 @@ final class AppSettings {
     func setHaloEnabled(_ enabled: Bool) {
         haloEnabled = enabled
         UserDefaults.standard.set(enabled, forKey: "clawdio.halo")
+    }
+
+    func setAvatar(_ character: AvatarCharacter) {
+        avatar = character
+        UserDefaults.standard.set(character.rawValue, forKey: "clawdio.avatar")
     }
 
     func setHoverStyle(_ style: HoverStyle) {

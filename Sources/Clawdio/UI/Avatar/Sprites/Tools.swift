@@ -112,7 +112,7 @@ extension AvatarSprites {
 
     /// Lignes du Terminal (12 px de large) : `V` = prompt vert, `P` = commande tapée, `W` = curseur,
     /// `g` = sortie gris foncé (distincte de la barre de titre claire).
-    private enum Shell {
+    enum Shell {
         static let command = "ZVZPPPPPZZZZ"
         static let out1 = "ZggggZZZZZZZ", out2 = "ZggZgggggZZZ"
         static let prompt = "ZVZWZZZZZZZZ", promptOff = "ZVZZZZZZZZZZ"

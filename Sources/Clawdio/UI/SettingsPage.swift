@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Page Paramètres : police de l'heure, son des notifications, démarrage automatique.
+/// Page Paramètres : police de l'heure, personnage de l'avatar, son des notifications, démarrage automatique.
 struct SettingsPage: View {
     let settings: AppSettings
     let sessions: SessionStore
@@ -19,6 +19,17 @@ struct SettingsPage: View {
                 HStack(spacing: 8) {
                     ForEach(TimeFont.allCases) { option in
                         fontChip(option)
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(t(.avatarTitle))
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.6))
+                HStack(spacing: 8) {
+                    ForEach(AvatarCharacter.allCases) { option in
+                        avatarChip(option)
                     }
                 }
             }
@@ -61,6 +72,28 @@ struct SettingsPage: View {
         )
         .contentShape(Rectangle())
         .onTapGesture { withAnimation(.snappy(duration: 0.25)) { settings.setTimeFont(option) } }
+    }
+
+    /// Même carte que les polices : le personnage en taille notch, immobile, et son nom.
+    private func avatarChip(_ option: AvatarCharacter) -> some View {
+        let selected = settings.avatar == option
+        let cast = option.repertoire
+        return VStack(spacing: 4) {
+            // Le duo, bien plus large, passe à l'échelle 1 pour tenir dans la carte.
+            AvatarCanvas(frame: cast.stand, scale: cast.points(CGFloat(cast.width) * cast.pixelScale > 24 ? 1 : 1.5), shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
+            Text(option.name)
+                .font(.system(size: 9.5, weight: .medium))
+                .foregroundStyle(.white.opacity(selected ? 0.9 : 0.45))
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 58)
+        .background(.white.opacity(selected ? 0.14 : 0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(.white.opacity(selected ? 0.5 : 0), lineWidth: 1)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture { withAnimation(.snappy(duration: 0.25)) { settings.setAvatar(option) } }
     }
 
     private func toggleRow(_ title: String, isOn: Bool, set: @escaping (Bool) -> Void) -> some View {

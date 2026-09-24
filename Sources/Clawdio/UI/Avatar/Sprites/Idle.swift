@@ -94,6 +94,4 @@ extension AvatarSprites {
     static let wake = SpriteClip(name: "wake", frames: [
         with(eyesHalf, hold: 2), with(stand, dy: -1), with(stand, hold: 2),
     ], fps: 8)
-
-    static let idleClips: [SpriteClip] = [blink, doubleBlink, lookAround, yawn, stretch, find, fallAsleep, snore, wake]
 }

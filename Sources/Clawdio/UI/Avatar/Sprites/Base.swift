@@ -214,9 +214,6 @@ enum AvatarSprites {
         }
     }
 
-    /// Tous les clips, pour la planche contact et la page de visualisation.
-    static let allClips: [SpriteClip] = [hop, wave, cheer, raiseHand, push] + idleClips + AvatarActivity.allCases.map(activityClip)
-
     static func with(_ frame: SpriteFrame, dx: Int = 0, dy: Int = 0, hold: Int = 1) -> SpriteFrame {
         SpriteFrame(image: frame.image, dx: dx, dy: dy, hold: hold)
     }

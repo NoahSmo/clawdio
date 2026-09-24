@@ -15,6 +15,15 @@ struct SpriteClip {
     let frames: [SpriteFrame]
     let fps: Double
     var loops = false
+    /// Réplique dite pendant le clip (bulle de dialogue, dans le popup seulement : voir `AvatarView.speaks`).
+    var quote: Quote? = nil
+
+    struct Quote: Equatable {
+        /// Qui parle : le personnage à gauche (Grace) ou à droite (Rocky). La bulle s'affiche de son côté.
+        enum Side { case leading, trailing }
+        let text: String
+        var side: Side = .trailing
+    }
 
     var ticks: Int { frames.reduce(0) { $0 + $1.hold } }
     var duration: Double { Double(ticks) / fps }

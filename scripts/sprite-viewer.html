@@ -260,12 +260,13 @@ const DATA = /*SPRITES_JSON*/null;
     return ctx;
   }
 
-  /// Une image complète : ombre fixe + corps décalé (même logique que `AvatarCanvas`).
+  /// Une image complète : ombre fixe + corps décalé + calque fixe éventuel (même logique que `AvatarCanvas`).
   function drawFrame(canvas, frame, s, { pad = 0, shadow = true, onion = null } = {}) {
     const ctx = sized(canvas, (N + pad * 2) * s, (N + pad * 2) * s);
     if (shadow) drawImage(ctx, DATA.shadow, s, pad, pad);
     if (onion) drawImage(ctx, onion.image, s, pad + onion.dx, pad + onion.dy, 0.28);
     drawImage(ctx, frame.image, s, pad + frame.dx, pad + frame.dy);
+    if (DATA.overlay) drawImage(ctx, DATA.overlay, s, pad, pad); // fixe, comme l'ombre (bulle de Rocky)
     return ctx;
   }
 

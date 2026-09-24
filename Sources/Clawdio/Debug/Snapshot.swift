@@ -26,47 +26,9 @@ enum Snapshot {
             print("stats: nil")
         }
 
-        // Planche contact de l'avatar : tailles réelles (notch ×1, popup ×2), puis chaque clip image par image (×6).
-        let label = { (text: String) in Text(text).font(.system(size: 10)).foregroundStyle(.white.opacity(0.5)) }
-        let sheet = VStack(alignment: .leading, spacing: 22) {
-            HStack(alignment: .bottom, spacing: 30) {
-                label("taille réelle").frame(width: 90, alignment: .leading)
-                AvatarCanvas(frame: AvatarSprites.stand, scale: 1)
-                AvatarCanvas(frame: AvatarSprites.stand, scale: 2)
-                AvatarCanvas(frame: AvatarSprites.stand, scale: 6)
-            }
-            HStack(alignment: .bottom, spacing: 14) {
-                label("repos").frame(width: 90, alignment: .leading)
-                ForEach(AvatarMood.gallery, id: \.self) { mood in
-                    VStack(spacing: 6) {
-                        AvatarCanvas(frame: AvatarSprites.rest(mood), scale: 6)
-                        label(mood.label)
-                    }
-                }
-            }
-            ForEach(AvatarSprites.allClips, id: \.name) { clip in
-                HStack(alignment: .bottom, spacing: 14) {
-                    label("\(clip.name)\n\(clip.fps.formatted()) i/s · \(clip.duration.formatted(.number.precision(.fractionLength(2)))) s")
-                        .frame(width: 90, alignment: .leading)
-                    ForEach(Array(clip.frames.enumerated()), id: \.offset) { i, frame in
-                        VStack(spacing: 6) {
-                            AvatarCanvas(frame: frame, scale: 6).padding(.top, 20) // place pour les sauts
-                            label("\(i) ×\(frame.hold)")
-                        }
-                    }
-                }
-            }
-        }
-        .padding(30)
-        .background(Color(white: 0.12))
-        .environment(\.colorScheme, .dark)
-        let sheetRenderer = ImageRenderer(content: sheet)
-        sheetRenderer.scale = 2
-        if let image = sheetRenderer.nsImage, let tiff = image.tiffRepresentation,
-           let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) {
-            try? FileManager.default.createDirectory(atPath: outputDirectory, withIntermediateDirectories: true)
-            try? png.write(to: URL(fileURLWithPath: "\(outputDirectory)/avatar-sheet.png"))
-            print("écrit avatar-sheet")
+        // Planche contact de chaque avatar : tailles réelles (notch ×1, popup ×2), puis chaque clip image par image (×6).
+        for character in AvatarCharacter.allCases {
+            writeSheet(character, to: outputDirectory)
         }
 
         let sessions = SessionStore()
@@ -213,6 +175,51 @@ enum Snapshot {
             }
         }
         settings.setPopupStyle(.glass)
+    }
+
+    private static func writeSheet(_ character: AvatarCharacter, to outputDirectory: String) {
+        let cast = character.repertoire
+        let label = { (text: String) in Text(text).font(.system(size: 10)).foregroundStyle(.white.opacity(0.5)) }
+        let sheet = VStack(alignment: .leading, spacing: 22) {
+            HStack(alignment: .bottom, spacing: 30) {
+                label("taille réelle").frame(width: 90, alignment: .leading)
+                AvatarCanvas(frame: cast.stand, scale: 1, shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
+                AvatarCanvas(frame: cast.stand, scale: 2, shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
+                AvatarCanvas(frame: cast.stand, scale: 6, shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
+            }
+            HStack(alignment: .bottom, spacing: 14) {
+                label("repos").frame(width: 90, alignment: .leading)
+                ForEach(AvatarMood.gallery, id: \.self) { mood in
+                    VStack(spacing: 6) {
+                        AvatarCanvas(frame: cast.rest(mood), scale: 6, shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
+                        label(mood.label)
+                    }
+                }
+            }
+            ForEach(cast.allClips, id: \.name) { clip in
+                HStack(alignment: .bottom, spacing: 14) {
+                    label("\(clip.name)\n\(clip.fps.formatted()) i/s · \(clip.duration.formatted(.number.precision(.fractionLength(2)))) s")
+                        .frame(width: 90, alignment: .leading)
+                    ForEach(Array(clip.frames.enumerated()), id: \.offset) { i, frame in
+                        VStack(spacing: 6) {
+                            AvatarCanvas(frame: frame, scale: 6, shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height).padding(.top, 20) // place pour les sauts
+                            label("\(i) ×\(frame.hold)")
+                        }
+                    }
+                }
+            }
+        }
+        .padding(30)
+        .background(Color(white: 0.12))
+        .environment(\.colorScheme, .dark)
+        let sheetRenderer = ImageRenderer(content: sheet)
+        sheetRenderer.scale = 2
+        if let image = sheetRenderer.nsImage, let tiff = image.tiffRepresentation,
+           let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) {
+            try? FileManager.default.createDirectory(atPath: outputDirectory, withIntermediateDirectories: true)
+            try? png.write(to: URL(fileURLWithPath: "\(outputDirectory)/avatar-sheet-\(character.rawValue).png"))
+            print("écrit avatar-sheet-\(character.rawValue)")
+        }
     }
 }
 #endif

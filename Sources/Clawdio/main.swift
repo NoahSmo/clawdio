@@ -5,7 +5,8 @@ MainActor.assumeIsolated {
 
     #if DEBUG
     if let flag = CommandLine.arguments.firstIndex(of: "--export-sprites"), flag + 1 < CommandLine.arguments.count {
-        SpriteExport.run(to: CommandLine.arguments[flag + 1])
+        let character = CommandLine.arguments.dropFirst(flag + 2).first.flatMap(AvatarCharacter.init(rawValue:)) ?? .clawd
+        SpriteExport.run(to: CommandLine.arguments[flag + 1], character: character)
         exit(0)
     }
     if let flag = CommandLine.arguments.firstIndex(of: "--snapshot"), flag + 1 < CommandLine.arguments.count {

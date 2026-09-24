@@ -51,6 +51,7 @@ enum L10n: String, CaseIterable {
     case popupStyle, styleGlass, styleBlack
     case hoverStyle, hoverOff, hoverSubtle, hoverBouncy
     case haloToggle
+    case avatarTitle
     case fontSystem, fontMono, fontMinecraft
     // Stats
     case today, tokensToday, period30, tokens30, topModel, analyzing, noActivity, partialCost
@@ -103,7 +104,7 @@ struct Strings {
     private static let tables: [AppLanguage: [L10n: String]] = [.fr: fr, .en: en, .es: es, .de: de]
 
     private static let fr: [L10n: String] = [
-        .haloToggle: "Halo autour du notch",
+        .haloToggle: "Halo autour du notch", .avatarTitle: "Personnage",
         .hoverStyle: "Survol du notch", .hoverOff: "Fixe", .hoverSubtle: "Léger", .hoverBouncy: "Bouncy",
         .popupStyle: "Fond du popup", .styleGlass: "Verre", .styleBlack: "Noir",
         .quit: "Quitter", .history: "Historique", .back: "Retour", .loading: "Chargement…",
@@ -136,7 +137,7 @@ struct Strings {
     ]
 
     private static let en: [L10n: String] = [
-        .haloToggle: "Notch glow",
+        .haloToggle: "Notch glow", .avatarTitle: "Character",
         .hoverStyle: "Notch hover", .hoverOff: "Still", .hoverSubtle: "Subtle", .hoverBouncy: "Bouncy",
         .popupStyle: "Popup background", .styleGlass: "Glass", .styleBlack: "Black",
         .quit: "Quit", .history: "History", .back: "Back", .loading: "Loading…",
@@ -169,7 +170,7 @@ struct Strings {
     ]
 
     private static let es: [L10n: String] = [
-        .haloToggle: "Halo alrededor del notch",
+        .haloToggle: "Halo alrededor del notch", .avatarTitle: "Personaje",
         .hoverStyle: "Al pasar el ratón", .hoverOff: "Fijo", .hoverSubtle: "Sutil", .hoverBouncy: "Elástico",
         .popupStyle: "Fondo del popup", .styleGlass: "Cristal", .styleBlack: "Negro",
         .quit: "Salir", .history: "Historial", .back: "Volver", .loading: "Cargando…",
@@ -202,7 +203,7 @@ struct Strings {
     ]
 
     private static let de: [L10n: String] = [
-        .haloToggle: "Leuchtrand um den Notch",
+        .haloToggle: "Leuchtrand um den Notch", .avatarTitle: "Figur",
         .hoverStyle: "Hover-Effekt", .hoverOff: "Ruhig", .hoverSubtle: "Dezent", .hoverBouncy: "Federnd",
         .popupStyle: "Popup-Hintergrund", .styleGlass: "Glas", .styleBlack: "Schwarz",
         .quit: "Beenden", .history: "Verlauf", .back: "Zurück", .loading: "Lädt…",

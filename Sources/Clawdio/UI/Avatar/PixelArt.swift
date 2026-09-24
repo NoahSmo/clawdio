@@ -38,6 +38,19 @@ struct PixelGrid {
         self.init(rows, palette: palette)
     }
 
+    /// La même image recopiée dans un canevas `width` × `height`, décalée de (dx, dy) — négatifs compris, ce qui
+    /// dépasse est rogné : réutilise un calque dessiné pour un personnage sur un autre, plus grand.
+    func placed(width: Int, height: Int, dx: Int, dy: Int) -> PixelGrid {
+        var out = Array(repeating: Array(repeating: Character("."), count: width), count: height)
+        for (y, row) in rows.enumerated() {
+            for (x, ch) in row.enumerated() where ch != "." {
+                let tx = x + dx, ty = y + dy
+                if (0..<width).contains(tx), (0..<height).contains(ty) { out[ty][tx] = ch }
+            }
+        }
+        return PixelGrid(out.map { String($0) }, palette: palette)
+    }
+
     /// Superpose des calques de même taille : chaque pixel non transparent recouvre ceux des calques précédents.
     static func layered(_ layers: [PixelGrid]) -> PixelGrid {
         guard var rows = layers.first?.rows.map(Array.init) else { return PixelGrid([], palette: [:]) }

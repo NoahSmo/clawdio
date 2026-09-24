@@ -204,6 +204,7 @@ struct NotchRootView: View {
             }
             // Chaînes de l'interface : lues ici, donc tout le popup se redessine au changement de langue.
             .environment(\.t, settings.t)
+            .environment(\.avatarCharacter, settings.avatar)
             // Fond toujours sombre → texte toujours clair, quel que soit le thème système.
             .environment(\.colorScheme, .dark)
             .foregroundStyle(.white)
@@ -332,6 +333,10 @@ private struct CollapsedContent: View {
 
     var body: some View {
         let need = sessions.headline
+        // Points en plus de Clawd (16 × 16) : la bulle suit le coin haut droit d'un avatar plus grand (Rocky).
+        let cast = settings.avatar.repertoire
+        let extraW = CGFloat(cast.width) * cast.points(Self.avatarScale) - CGFloat(AvatarSprites.size) * Self.avatarScale
+        let extraH = CGFloat(cast.height) * cast.points(Self.avatarScale) - CGFloat(AvatarSprites.size) * Self.avatarScale
         HStack(spacing: 0) {
             Group {
                 if leftReady {
@@ -356,9 +361,9 @@ private struct CollapsedContent: View {
                 AvatarView(scale: Self.avatarScale, mood: AvatarMood(need, tool: sessions.headlineTool), nudge: geometry.hoverGrow == .zero ? hoverCount : 0)
                     .offset(y: 4) // pieds près du bas de la pastille, place au-dessus pour la bulle
                 // Bulle en haut à droite de la tête, queue contre la tempe : au-dessus de la tête, elle touchait le
-                // haut de l'écran (pastille de 38 pt).
+                // haut de l'écran (pastille de 38 pt). Suit le coin haut droit d'un avatar plus grand (Rocky).
                 StatusBadge(state: need, scale: Self.avatarScale)
-                    .offset(x: 18, y: -12.5)
+                    .offset(x: 18 + extraW / 2, y: -12.5 - extraH / 2) // à moitié : sinon elle sort de la pastille / touche le haut de l'écran
             }
             .frame(width: 38, height: geometry.notchSize.height, alignment: .center)
             .padding(.trailing, 13 + growHalf)
@@ -546,6 +551,11 @@ private struct HeroView: View {
     /// false tant que le popup est préchauffé mais invisible : Clawd ne joue aucune scène (chaque scène redessine la fenêtre).
     let active: Bool
     @Environment(\.t) private var t
+    @Environment(\.avatarCharacter) private var character
+
+    /// Taille de l'avatar dans le popup (×2) : 32 × 32 pt pour Clawd, 54 × 45 pour Rocky.
+    private var avatarWidth: CGFloat { CGFloat(character.repertoire.width) * character.repertoire.points(2) }
+    private var avatarHeight: CGFloat { CGFloat(character.repertoire.height) * character.repertoire.points(2) }
 
     var body: some View {
         let need = sessions.headline
@@ -557,11 +567,11 @@ private struct HeroView: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
                 ZStack(alignment: .bottomLeading) {
-                    AvatarView(scale: 2, mood: AvatarMood(need, tool: sessions.headlineTool), greets: true, active: active)
+                    AvatarView(scale: 2, mood: AvatarMood(need, tool: sessions.headlineTool), greets: true, active: active, speaks: true)
                     StatusBadge(state: need, scale: 2)
-                        .offset(x: 20, y: -28)
+                        .offset(x: avatarWidth - 12, y: 4 - avatarHeight)
                 }
-                .frame(width: 32 + 24, height: 32, alignment: .bottomLeading)
+                .frame(width: avatarWidth + 24, height: avatarHeight, alignment: .bottomLeading)
                 statusText(need)
                     .padding(.top, 6)
                     .padding(.bottom, 8)

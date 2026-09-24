@@ -2,10 +2,11 @@
 import CoreGraphics
 import Foundation
 
-/// `Clawdio --export-sprites <fichier.json>` : écrit les sprites de l'avatar (pixels, clips, palette) en JSON
+/// `Clawdio --export-sprites <fichier.json> [clawd|rocky|rockySuit]` : écrit les sprites d'un personnage (pixels, clips, palette) en JSON
 /// puis quitte. Alimente la page de visualisation (`scripts/sprite-viewer.sh`). Debug uniquement.
 enum SpriteExport {
-    static func run(to path: String) {
+    static func run(to path: String, character: AvatarCharacter = .clawd) {
+        let cast = character.repertoire
         var images: [String: Any] = [:]
         var ids: [ObjectIdentifier: String] = [:]
         func id(_ image: CGImage) -> String {
@@ -17,14 +18,16 @@ enum SpriteExport {
         }
 
         var output: [String: Any] = [
-            "size": AvatarSprites.size,
+            "size": max(cast.width, cast.height), "width": cast.width, "height": cast.height,
+            "character": character.rawValue,
             "exportedAt": ISO8601DateFormatter().string(from: .now),
-            "palette": AvatarPalette.standard
+            "palette": (character == .clawd ? AvatarPalette.standard : RockySprites(character == .rockySuit ? .suit : character == .rockyBubble ? .bubble : .natural).palette)
                 .sorted { String($0.key) < String($1.key) }
                 .map { ["key": String($0.key), "hex": hex($0.value)] },
-            "shadow": id(AvatarSprites.shadow),
-            "rest": Dictionary(uniqueKeysWithValues: AvatarMood.gallery.map { ($0.label, id(AvatarSprites.rest($0).image)) }),
-            "clips": AvatarSprites.allClips.map { serialize($0, id) },
+            "shadow": id(cast.shadow),
+            "overlay": cast.overlay.map { id($0) as Any } ?? NSNull(),
+            "rest": Dictionary(uniqueKeysWithValues: AvatarMood.gallery.map { ($0.label, id(cast.rest($0).image)) }),
+            "clips": cast.allClips.map { serialize($0, id) },
             "badges": [
                 "w": BadgeSprites.width, "h": BadgeSprites.height,
                 "clips": BadgeSprites.allClips.map { serialize($0, id) },
@@ -34,7 +37,7 @@ enum SpriteExport {
         do {
             let data = try JSONSerialization.data(withJSONObject: output, options: [.sortedKeys])
             try data.write(to: URL(fileURLWithPath: path))
-            print("écrit \(path) (\(images.count) images, \(AvatarSprites.allClips.count) clips)")
+            print("écrit \(path) (\(images.count) images, \(cast.allClips.count) clips, \(character.name))")
         } catch {
             print("échec export : \(error)")
         }
