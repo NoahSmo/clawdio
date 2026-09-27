@@ -65,9 +65,12 @@ struct AvatarView: View {
         // Bulle du côté de celui qui parle, hors du cadre de l'avatar (au-dessus, le popup n'a pas la place).
         .overlay(alignment: quote?.side == .leading ? .leading : .trailing) {
             if let quote {
+                let leading = quote.side == .leading
+                // Cadre de largeur nulle posé sur le bord de l'avatar : la bulle en déborde vers l'extérieur, quelle
+                // que soit sa largeur (des `alignmentGuide` dans l'overlay la laissaient par-dessus l'avatar).
                 SpeechBubble(quote: quote)
-                    .alignmentGuide(.leading) { $0[.trailing] + 6 }
-                    .alignmentGuide(.trailing) { $0[.leading] - 16 } // laisse la place au badge d'état
+                    .frame(width: 0, alignment: leading ? .trailing : .leading)
+                    .offset(x: leading ? -8 : 10)
                     .transition(.opacity)
                     .id(quote.text)
             }
