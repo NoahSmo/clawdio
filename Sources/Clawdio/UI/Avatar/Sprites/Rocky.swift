@@ -3,9 +3,9 @@ import CoreGraphics
 /// Rocky, l'Éridien de « Projet Hail Mary » : carapace de pierre, cinq pattes terminées par des pinces à trois
 /// doigts, et pas d'yeux — il « voit » au sonar et parle en accords musicaux.
 ///
-/// Dessiné d'après le film : petite carapace de grès plate, suspendue haut entre cinq longues pattes très
-/// écartées qui forment un ∩ autour d'elle ; fissures et vert-de-gris sur les pattes. Même vue que Clawd (face
-/// à la caméra, lumière zénithale). Sans visage, il s'exprime par les notes de musique (`M`) et par ses pattes :
+/// Dessiné d'après un pixel art du film : carapace ronde en dôme, brun cuivré tachée de patine verte, entre
+/// des pattes épaisses et segmentées qui montent en arche jusqu'au coude puis descendent au sol. Même vue que
+/// Clawd (face à la caméra, lumière zénithale). Sans visage, il s'exprime par les notes de musique (`M`) et par ses pattes :
 /// une seule bouge à la fois, comme les yeux de Clawd.
 ///
 /// Les accessoires (livre, laptop, Terminal, globe) sont ceux de Clawd : mêmes lettres, recolorés avec la
@@ -23,14 +23,15 @@ final class RockySprites {
 
         var colors: [Character: PixelColor] {
             switch self {
-            case .natural, .bubble, .duo: [           // grès ocre du film
-                "K": PixelColor(0x3A2A1A),      // contour
-                "H": PixelColor(0xDDBF8E),      // arêtes éclairées (dessus, coudes)
-                "h": PixelColor(0xC4A06C),      // pente éclairée
-                "O": PixelColor(0xA8834F),      // roche
-                "S": PixelColor(0x74583A),      // ombre propre, bas des pattes
-                "T": PixelColor(0x4A3620),      // fissures
-                "J": PixelColor(0x4E9C8A),      // vert-de-gris incrusté
+            case .natural, .bubble, .duo: [   // roche brun cuivré
+                "K": PixelColor(0x2E1A0E),      // contour
+                "H": PixelColor(0xE0A469),      // arêtes éclairées (dessus, coudes)
+                "h": PixelColor(0xBC7A45),      // pente éclairée
+                "O": PixelColor(0x975A2F),      // roche
+                "S": PixelColor(0x66391B),      // ombre propre, bas des pattes
+                "T": PixelColor(0x44240F),      // fissures, articulations
+                "J": PixelColor(0x3E9A48),      // patine verte
+                "j": PixelColor(0x8BD870),      // patine verte, reflet
             ]
             case .suit: [
                 "K": PixelColor(0x2A2E35),
@@ -40,6 +41,7 @@ final class RockySprites {
                 "S": PixelColor(0x7D8894),      // plis, bottes
                 "T": PixelColor(0x9AA3AD),      // coutures
                 "J": PixelColor(0xF08A24),      // écussons orange
+                "j": PixelColor(0xFFBE73),
             ]
             }
         }
@@ -54,7 +56,7 @@ final class RockySprites {
         palette = AvatarPalette.standard.merging(look.colors.merging(Grace.colors) { _, new in new }.merging([
             "M": PixelColor(0x9FE0FF),              // notes de musique (sa voix)
             "m": PixelColor(0x9FE0FF, alpha: 0.5),  // note qui s'efface
-            "X": PixelColor(0xDDEFF7, alpha: 0.45), // arêtes de la bulle
+            "X": PixelColor(0xA8F0A0, alpha: 0.5),  // arêtes de la bulle, vert d'Érid
         ]) { _, new in new }) { _, rocky in rocky }
     }
 
@@ -147,224 +149,245 @@ final class RockySprites {
     lazy var overlay: CGImage? = look == .bubble ? PixelGrid(Bubble.edges.rows, palette: palette).makeImage() : nil
 
     enum Body {
-        /// Carapace : un rocher large et plat, suspendu haut entre les pattes. Facettes et fissures en
-        /// diagonale, jamais symétriques : deux taches côte à côte se liraient comme des yeux.
-        static let carapace = layer(5, [
-            ".........HhHHHH.........",
-            "........HhHHhHHH........",
-            ".......hhhhThhOhS.......",
-            ".......hOOOOTOOTS.......",
-            "........TTOOTTOS........",
-            ".........hTSSSS.........",
-            "..........hSTS..........",
+        /// Carapace : un rocher rond en dôme, brun cuivré, taches de patine verte (vert-de-gris) jamais
+        /// alignées — deux taches côte à côte se liraient comme des yeux.
+        static let carapace = layer(3, [
+            "..........KKKK..........",
+            "........KKHHHhKK........",
+            ".......KHHJJHhhhK.......",
+            "......KhHJjJJhhOOK......",
+            "......KhhJJJhOOOSK......",
+            ".....KhhhhhOOOJJOSK.....",
+            ".....KhOOhOOOJjJSSK.....",
+            ".....KOOTOOOOOJJSSK.....",
+            "......KJJOTOOOSSSK......",
+            ".......KKOSSSTSKK.......",
+            ".........KKKKKK.........",
         ])
+
         /// Tassé d'une ligne (sommeil).
-        static let low = layer(6, [
-            ".........HhHHHH.........",
-            "........HhHHhHHH........",
-            ".......hhhhThhOhS.......",
-            ".......hOOOOTOOTS.......",
-            "........TTOOTTOS........",
-            ".........hTSSSS.........",
-            "..........hSTS..........",
+        static let low = layer(4, [
+            "..........KKKK..........",
+            "........KKHHHhKK........",
+            ".......KHHJJHhhhK.......",
+            "......KhHJjJJhhOOK......",
+            "......KhhJJJhOOOSK......",
+            ".....KhhhhhOOOJJOSK.....",
+            ".....KhOOhOOOJjJSSK.....",
+            ".....KOOTOOOOOJJSSK.....",
+            "......KJJOTOOOSSSK......",
+            ".......KKOSSSTSKK.......",
+            ".........KKKKKK.........",
         ])
     }
 
     enum Legs {
-        /// Pattes intérieures fines sous la carapace, et la cinquième derrière (`T`, dans l'ombre).
-        static let inner = layer(11, [
-            ".........O....O.........",
-            ".........OS..SO.........",
-            "........OS.TT.SO........",
-            "........OS.TT.SO........",
-            ".......OS..TT..SO.......",
-            ".......OS..TT..SO.......",
-            "......SSS..TT..SSS......",
+        /// Deux pattes avant, épaisses, sous la carapace.
+        static let inner = layer(13, [
+            ".........KOS..SOK.......",
+            "........KhOS..hOSK......",
+            ".......KhOS....hOSK.....",
+            ".......KOOS....OOSK.....",
+            "......KS.SK....KS.SK....",
         ])
 
-        static let innerLow = layer(12, [
-            ".........O....O.........",
-            "........OS.TT.SO........",
-            "........OS.TT.SO........",
-            ".......OS..TT..SO.......",
-            ".......OS..TT..SO.......",
-            "......SSS..TT..SSS......",
+        static let innerLow = layer(14, [
+            "........KhOS..hOSK......",
+            ".......KhOS....hOSK.....",
+            ".......KOOS....OOSK.....",
+            "......KS.SK....KS.SK....",
         ])
 
-        /// Pied intérieur droit levé d'un pixel (il tapote).
-        static let innerTap = layer(11, [
-            ".........O....O.........",
-            ".........OS..SO.........",
-            "........OS.TT.SO........",
-            "........OS.TT.SO........",
-            ".......OS..TT..SO.......",
-            ".......OS..TT..SSS......",
-            "......SSS..TT...........",
+        /// Pied avant droit levé d'un pixel (il tapote).
+        static let innerTap = layer(13, [
+            ".........KOS..SOK.......",
+            "........KhOS..hOSK......",
+            ".......KhOS....hOSK.....",
+            ".......KOOS....KS.SK....",
+            "......KS.SK.............",
         ])
 
         /// Poussée : pieds écartés puis serrés, en alternance.
-        static let innerApart = layer(11, [
-            ".........O....O.........",
-            "........OS....SO........",
-            ".......OS..TT..SO.......",
-            "......OS...TT...SO......",
-            ".....OS....TT....SO.....",
-            ".....OS....TT....SO.....",
-            "....SSS....TT....SSS....",
+        static let innerApart = layer(13, [
+            ".........KOS..SOK.......",
+            "........KhOS..hOSK......",
+            "......KhOS......hOSK....",
+            ".....KhOS........hOSK...",
+            "....KS.SK........KS.SK..",
         ])
 
-        static let innerTogether = layer(11, [
-            ".........O....O.........",
-            ".........OS..SO.........",
-            ".........OSTTSO.........",
-            ".........OSTTSO.........",
-            ".........OSTTSO.........",
-            ".........OSTTSO.........",
-            "........SSSTTSSS........",
+        static let innerTogether = layer(13, [
+            ".........KOS..SOK.......",
+            ".........KOS..SOK.......",
+            ".........KOS..SOK.......",
+            ".........KOS..SOK.......",
+            "........KS.SKKS.SK......",
         ])
 
-        /// Pattes extérieures : cuisse à l'horizontale au niveau du dessus de la carapace, coude arrondi, puis
-        /// long avant-bras qui descend : un ∩ (avec des coudes plus hauts que la carapace, il faisait un M).
-        /// Poignet fissuré (`T`), pince au sol.
-        static let leftDown = layer(5, [
-            "..hhhhhh................",
-            ".hOSSSSS................",
-            "hOS.....................",
-            "hJS.....................",
-            "OOS.....................",
-            "OOS.....................",
-            "TTT.....................",
-            "OOS.....................",
-            "OOS.....................",
-            "OTS.....................",
-            "OOS.....................",
-            "OOS.....................",
+        /// Pattes extérieures, épaisses et segmentées : le haut monte de la carapace jusqu'au coude, en arche,
+        /// puis l'avant-bras descend au sol. Articulation sombre (`T`), incrustations vertes (`J`), pince à trois doigts.
+        static let leftDown = layer(1, [
+            "...KKK..................",
+            "..KHHhK.................",
+            "..KhHhOK................",
+            ".KhJhOOSK...............",
+            ".KhJSKOOSK..............",
+            ".KhOS.KSK...............",
+            ".KhOS...................",
+            "KhOOS...................",
+            "KTTTK...................",
+            "KhOS....................",
+            "KhJS....................",
+            "KOJS....................",
+            "KOOS....................",
+            "KOSS....................",
+            "KhSK....................",
+            "KSSK....................",
             "S.SS....................",
         ])
 
-        static let rightDown = layer(5, [
-            "................hhhhhh..",
-            "................SSSSSOh.",
-            ".....................SOh",
-            ".....................SOh",
-            ".....................STO",
-            ".....................SOO",
-            ".....................TTT",
-            ".....................SOO",
-            ".....................SJO",
-            ".....................SOO",
-            ".....................SOO",
-            ".....................SOO",
+        static let rightDown = layer(1, [
+            "..................KKK...",
+            ".................KhHHK..",
+            "................KOhHhK..",
+            "...............KSOOhJhK.",
+            "..............KSOOKSJhK.",
+            "...............KSK.SOhK.",
+            "...................SOhK.",
+            "...................SOOhK",
+            "...................KTTTK",
+            "....................SOhK",
+            "....................SJhK",
+            "....................SJOK",
+            "....................SOOK",
+            "....................SSOK",
+            "....................KShK",
+            "....................KSSK",
             "....................SS.S",
         ])
 
-        static let leftDownLow = layer(6, [
-            "..hhhhhh................",
-            ".hOSSSSS................",
-            "hOS.....................",
-            "hJS.....................",
-            "OOS.....................",
-            "OOS.....................",
-            "TTT.....................",
-            "OOS.....................",
-            "OTS.....................",
-            "OOS.....................",
-            "OOS.....................",
+        static let leftDownLow = layer(2, [
+            "...KKK..................",
+            "..KHHhK.................",
+            "..KhHhOK................",
+            ".KhJhOOSK...............",
+            ".KhJSKOOSK..............",
+            ".KhOS.KSK...............",
+            ".KhOS...................",
+            "KhOOS...................",
+            "KTTTK...................",
+            "KhOS....................",
+            "KhJS....................",
+            "KOOS....................",
+            "KOSS....................",
+            "KhSK....................",
+            "KSSK....................",
             "S.SS....................",
         ])
 
-        static let rightDownLow = layer(6, [
-            "................hhhhhh..",
-            "................SSSSSOh.",
-            ".....................SOh",
-            ".....................SOh",
-            ".....................STO",
-            ".....................SOO",
-            ".....................TTT",
-            ".....................SJO",
-            ".....................SOO",
-            ".....................SOO",
-            ".....................SOO",
+        static let rightDownLow = layer(2, [
+            "..................KKK...",
+            ".................KhHHK..",
+            "................KOhHhK..",
+            "...............KSOOhJhK.",
+            "..............KSOOKSJhK.",
+            "...............KSK.SOhK.",
+            "...................SOhK.",
+            "...................SOOhK",
+            "...................KTTTK",
+            "....................SOhK",
+            "....................SJhK",
+            "....................SOOK",
+            "....................SSOK",
+            "....................KShK",
+            "....................KSSK",
             "....................SS.S",
         ])
 
         /// Patte levée comme un bras, pince ouverte ; `Closed` = pince refermée (l'autre temps du coucou :
         /// seule la main bouge).
         static let leftUp = layer(0, [
-            "S..S....................",
-            ".SSS....................",
-            ".hOS....................",
-            ".hJS....................",
-            ".hOS....................",
-            ".TTTh...................",
-            ".hOShhh.................",
-            ".hOS.Shh................",
-            "......SS................",
+            "KS.SK...................",
+            "KhOSK...................",
+            "KhJS....................",
+            "KhJS....................",
+            "KTTTK...................",
+            "KhOOK...................",
+            "KhOOhKK.................",
+            ".KhOOOSK................",
+            "..KKSSK.................",
         ])
 
         static let rightUp = layer(0, [
-            "....................S..S",
-            "....................SSS.",
-            "....................SOh.",
-            "....................SJh.",
-            "....................SOh.",
-            "...................hTTT.",
-            ".................hhhSOh.",
-            "................hhS.SOh.",
-            "................SS......",
+            "...................KS.SK",
+            "...................KSOhK",
+            "....................SJhK",
+            "....................SJhK",
+            "...................KTTTK",
+            "...................KOOhK",
+            ".................KKhOOhK",
+            "................KSOOOhK.",
+            ".................KSSKK..",
         ])
 
-        static let rightUpClosed = layer(1, [
-            "....................SSS.",
-            "....................SOh.",
-            "....................SJh.",
-            "....................SOh.",
-            "...................hTTT.",
-            ".................hhhSOh.",
-            "................hhS.SOh.",
-            "................SS......",
+        static let rightUpClosed = layer(0, [
+            "....................KKK.",
+            "...................KSOhK",
+            "....................SJhK",
+            "....................SJhK",
+            "...................KTTTK",
+            "...................KOOhK",
+            ".................KKhOOhK",
+            "................KSOOOhK.",
+            ".................KSSKK..",
         ])
 
         /// Pattes tendues à plat contre les murs, une ligne plus haut ou plus bas (tremblement d'effort).
-        static let pushHigh = layer(5, [
-            "S......................S",
-            "S......................S",
-            "ShhThhhh........hhhhThhS",
-            "SSSSSSSS........SSSSSSSS",
-            "S......................S",
-            "S......................S",
+        static let pushHigh = layer(6, [
+            "K......................K",
+            "KKKKKKK..........KKKKKKK",
+            "KhhThhhK........KhhhThhK",
+            "KOOTOOSK........KSOOTOOK",
+            "KSSSSSK..........KSSSSSK",
+            "K......................K",
         ])
 
-        static let pushLow = layer(6, [
-            "S......................S",
-            "S......................S",
-            "ShhThhhh........hhhhThhS",
-            "SSSSSSSS........SSSSSSSS",
-            "S......................S",
-            "S......................S",
+        static let pushLow = layer(7, [
+            "K......................K",
+            "KKKKKKK..........KKKKKKK",
+            "KhhThhhK........KhhhThhK",
+            "KOOTOOSK........KSOOTOOK",
+            "KSSSSSK..........KSSSSSK",
+            "K......................K",
         ])
 
-        /// Avant-bras remontés, pince posée sur le bord d'un objet tenu devant lui (livre, Terminal).
-        static let holdLeft = layer(5, [
-            "..hhhhhh................",
-            ".hOSSSSS................",
-            "hOS.....................",
-            "hJS.....................",
-            "OOS.....................",
-            "OOS.....................",
-            ".OSSS...................",
-            "....SS..................",
+        /// Avant-bras qui se replient vers l'intérieur : pince posée sur le bord d'un objet tenu devant lui.
+        static let holdLeft = layer(1, [
+            "...KKK..................",
+            "..KHHhK.................",
+            "..KhHhOK................",
+            ".KhJhOOSK...............",
+            ".KhJSKOOSK..............",
+            ".KhOS.KSK...............",
+            ".KhOS...................",
+            "KhOOS...................",
+            "KhOS....................",
+            ".KOSSK..................",
+            "..KSSK..................",
         ])
 
-        static let holdRight = layer(5, [
-            "................hhhhhh..",
-            "................SSSSSOh.",
-            ".....................SOh",
-            ".....................SJh",
-            ".....................SOO",
-            ".....................SOO",
-            "...................SSSO.",
-            "..................SS....",
+        static let holdRight = layer(1, [
+            "..................KKK...",
+            ".................KhHHK..",
+            "................KOhHhK..",
+            "...............KSOOhJhK.",
+            "..............KSOOKSJhK.",
+            "...............KSK.SOhK.",
+            "...................SOhK.",
+            "...................SOOhK",
+            "....................SOhK",
+            "..................KSSOK.",
+            "..................KSSK..",
         ])
     }
 
@@ -482,23 +505,26 @@ final class RockySprites {
     /// Calques à l'échelle du duo : la patte gauche de Rocky tendue vers Grace (elle remplace `Legs.leftDown`).
     enum Duo {
         /// Pince en route, encore à un pixel du poing de Grace.
-        static let reach = duoLayer(5, [
-            "..............hhhhhh",
-            ".............hOSSSSS",
-            "............hOS",
-            "............hJS",
-            "............TTT",
-            "............OS",
+        static let reach = duoLayer(4, [
+            "...............KKK",
+            "..............KHhhK",
+            ".............KhOOOSK",
+            "............KhJSKOSK",
+            "...........KhJSK",
+            "...........KTTTK",
+            "............KOSK",
+            "............KSK",
         ])
         /// Pince contre le poing.
-        static let bump = duoLayer(5, [
-            "..............hhhhhh",
-            ".............hOSSSSS",
-            "............hOS",
-            "............hJS",
-            "...........OOS",
-            "...........TTT",
-            "...........OS",
+        static let bump = duoLayer(4, [
+            "...............KKK",
+            "..............KHhhK",
+            ".............KhOOOSK",
+            "............KhJSKOSK",
+            "...........KhJSK",
+            "...........KTTK",
+            "...........KhSK",
+            "...........KSK",
         ])
         /// Étincelles du check, au point de contact.
         static let spark = duoLayer(7, [
@@ -540,13 +566,13 @@ final class RockySprites {
         /// Deux mini-Rocky au sol, aux coins : carapace plate et pattes écartées. Les pattes extérieures du grand
         /// sont levées pour leur laisser la place.
         static let minis = layer(15, [
-            ".hh..................hh.",
-            "hOOh................hOOh",
+            ".KK..................KK.",
+            "KhJK................KJhK",
             "S..S................S..S",
         ])
         static let minisHop = layer(14, [
-            ".hh..................hh.",
-            "hOOh................hOOh",
+            ".KK..................KK.",
+            "KhJK................KJhK",
             "S..S................S..S",
         ])
     }

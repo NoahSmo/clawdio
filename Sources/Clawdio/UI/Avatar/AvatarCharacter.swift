@@ -48,6 +48,17 @@ struct AvatarRepertoire {
     func points(_ scale: CGFloat) -> CGFloat {
         max(0.5, (scale * pixelScale * 2).rounded() / 2)
     }
+
+    /// Plus grande échelle ≤ `preferred`, par demi-pas, où l'avatar tient dans `box` (points) : le duo Rocky & Grace,
+    /// deux fois plus large, passe à ×1 dans le notch au lieu de déborder de la pastille.
+    func fitting(_ preferred: CGFloat, in box: CGSize) -> CGFloat {
+        var scale = preferred
+        while scale > 0.5,
+              CGFloat(width) * points(scale) > box.width || CGFloat(height) * points(scale) > box.height {
+            scale -= 0.5
+        }
+        return scale
+    }
     let shadow: CGImage
     /// Dessiné par-dessus, fixe comme l'ombre (la bulle de Rocky) : ne suit pas les sauts.
     var overlay: CGImage? = nil

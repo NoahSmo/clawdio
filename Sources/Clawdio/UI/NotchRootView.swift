@@ -133,7 +133,7 @@ struct NotchRootView: View {
             // gauche sans avancer, recule, charge et étend ce bord, puis court étendre le bord droit (voir
             // `birthSequence`) — il s'écrase légèrement à chaque impact. Il disparaît une fois la pastille posée.
             if leftBirth < 0.999 || rightBirth < 0.999 {
-                AvatarView(scale: CollapsedContent.avatarScale, mood: .pushing)
+                AvatarView(scale: settings.avatar.repertoire.fitting(CollapsedContent.avatarScale, in: CollapsedContent.avatarBox), mood: .pushing)
                     .scaleEffect(x: pushFacing, y: pushSquash, anchor: .bottom)
                     .offset(x: pushX)
                     .frame(width: state.geometry.notchSize.width, height: state.geometry.notchSize.height, alignment: .center)
@@ -312,6 +312,8 @@ struct NotchRootView: View {
 private struct CollapsedContent: View {
     /// Points par pixel du sprite dans le notch (aussi pour l'avatar de naissance).
     static let avatarScale: CGFloat = 1.5
+    /// Place de l'avatar dans l'aile droite : au-delà, il touche le bord de la pastille ou le haut de l'écran.
+    static let avatarBox = CGSize(width: 40, height: 30)
 
     let usage: UsageModel
     let sessions: SessionStore
@@ -335,8 +337,9 @@ private struct CollapsedContent: View {
         let need = sessions.headline
         // Points en plus de Clawd (16 × 16) : la bulle suit le coin haut droit d'un avatar plus grand (Rocky).
         let cast = settings.avatar.repertoire
-        let extraW = CGFloat(cast.width) * cast.points(Self.avatarScale) - CGFloat(AvatarSprites.size) * Self.avatarScale
-        let extraH = CGFloat(cast.height) * cast.points(Self.avatarScale) - CGFloat(AvatarSprites.size) * Self.avatarScale
+        let scale = cast.fitting(Self.avatarScale, in: Self.avatarBox)
+        let extraW = CGFloat(cast.width) * cast.points(scale) - CGFloat(AvatarSprites.size) * Self.avatarScale
+        let extraH = CGFloat(cast.height) * cast.points(scale) - CGFloat(AvatarSprites.size) * Self.avatarScale
         HStack(spacing: 0) {
             Group {
                 if leftReady {
@@ -358,7 +361,7 @@ private struct CollapsedContent: View {
             ZStack(alignment: .bottomLeading) {
                 // ×1,5 : 3 pixels écran par pixel du sprite sur un Retina (tous les Mac à encoche le sont) — net,
                 // et plus lisible qu'à ×1. Badge à la même échelle : même taille de pixels que l'avatar.
-                AvatarView(scale: Self.avatarScale, mood: AvatarMood(need, tool: sessions.headlineTool), nudge: geometry.hoverGrow == .zero ? hoverCount : 0)
+                AvatarView(scale: scale, mood: AvatarMood(need, tool: sessions.headlineTool), nudge: geometry.hoverGrow == .zero ? hoverCount : 0)
                     .offset(y: 4) // pieds près du bas de la pastille, place au-dessus pour la bulle
                 // Bulle en haut à droite de la tête, queue contre la tempe : au-dessus de la tête, elle touchait le
                 // haut de l'écran (pastille de 38 pt). Suit le coin haut droit d'un avatar plus grand (Rocky).

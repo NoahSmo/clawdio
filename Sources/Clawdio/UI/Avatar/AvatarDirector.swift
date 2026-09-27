@@ -21,11 +21,17 @@ enum AvatarDirector {
             // Boucle serrée, sans pause : il pousse tant que dure la naissance de la pastille.
             Beat(clip: cast.push)
         case .waiting:
-            // Il attend ta réponse : coucou répété, avec une explosion de joie un temps sur quatre.
-            Beat(clip: round % 4 == 0 ? cast.cheer : cast.wave, after: 2.2...3.2)
+            // Il a fini et attend ta réponse : il fête ça une fois (« Amaze ! »), puis t'appelle d'un coucou de
+            // temps en temps, entre deux gestes de repos. Un coucou toutes les 3 s tournait à l'agitation.
+            if round == 1 {
+                Beat(before: 0.2...0.4, clip: cast.cheer, after: 3...4)
+            } else {
+                Beat(clip: round % 2 == 0 ? cast.wave : idleGesture(cast, drowsy: false), after: 5...8)
+            }
         case .attention:
-            // Main levée en permanence (pose de repos), petits sauts insistants.
-            Beat(clip: cast.raiseHand, after: 1.2...1.8)
+            // Besoin d'une autorisation, plus pressant : main levée en permanence (pose de repos), et des petits
+            // sauts pour se faire remarquer — vite au début, puis plus espacés.
+            Beat(clip: cast.raiseHand, after: round <= 2 ? 1.2...1.8 : 3...5)
         case .working(let activity):
             // L'accessoire reste visible au repos (pose d'activité) ; le clip rejoue le geste de temps en temps.
             // Une pause au moins aussi longue que le clip : le sprite est immobile la moitié du temps.
@@ -41,10 +47,13 @@ enum AvatarDirector {
         if asleep { return Beat(clip: cast.snore, after: 3...6) }
         if idleFor > sleepAfter { return Beat(before: 1...2, clip: cast.fallAsleep, asleep: true) }
 
-        let drowsy = idleFor > sleepAfter / 2
+        return Beat(before: 4...9, clip: idleGesture(cast, drowsy: idleFor > sleepAfter / 2))
+    }
+
+    /// Un geste de repos tiré au sort selon les poids du personnage (voir `AvatarRepertoire.idle`).
+    private static func idleGesture(_ cast: AvatarRepertoire, drowsy: Bool) -> SpriteClip {
         let weighted = cast.idle.map { ($0.clip, drowsy ? $0.drowsy : $0.weight) }
         var roll = Double.random(in: 0..<weighted.reduce(0) { $0 + $1.1 })
-        let clip = weighted.first { roll -= $0.1; return roll < 0 }?.0 ?? cast.idle[0].clip
-        return Beat(before: 4...9, clip: clip)
+        return weighted.first { roll -= $0.1; return roll < 0 }?.0 ?? cast.idle[0].clip
     }
 }
