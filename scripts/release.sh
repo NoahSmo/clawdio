@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Publie une version de Clawdio : build, zip en GitHub Release, puis cask à jour dans le tap Homebrew.
 #   ./scripts/release.sh 0.2.0
-# Ensuite, pour tout le monde : brew install --cask <compte>/clawdio/clawdio
-# Prérequis : gh connecté (gh auth login), dépôts <compte>/clawdio et <compte>/homebrew-clawdio (créés au besoin).
+# Ensuite, pour tout le monde : brew install --cask <compte>/tap/clawdio
+# Prérequis : gh connecté (gh auth login), dépôts <compte>/clawdio et <compte>/homebrew-tap (créés au besoin).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -10,7 +10,7 @@ VERSION="${1:?usage : ./scripts/release.sh <version>, ex. 0.2.0}"
 export VERSION
 OWNER="${CLAWDIO_OWNER:-$(gh api user --jq .login)}"
 REPO="$OWNER/clawdio"
-TAP_REPO="$OWNER/homebrew-clawdio"
+TAP_REPO="$OWNER/homebrew-tap"
 TAG="v$VERSION"
 
 git diff --quiet && git diff --cached --quiet || { echo "Commits d'abord : l'arbre de travail n'est pas propre." >&2; exit 1; }
@@ -30,11 +30,11 @@ ditto -c -k --keepParent build/Clawdio.app "$ZIP"
 SHA="$(shasum -a 256 "$ZIP" | awk '{print $1}')"
 
 gh release create "$TAG" "$ZIP" --repo "$REPO" --title "Clawdio $VERSION" \
-  --notes "Installer / mettre à jour : \`brew install --cask $OWNER/clawdio/clawdio\` (ou \`brew upgrade --cask clawdio\`)."
+  --notes "Installer / mettre à jour : \`brew install --cask $OWNER/tap/clawdio\` (ou \`brew upgrade --cask clawdio\`)."
 
-# Tap : dépôt homebrew-clawdio, un seul fichier Casks/clawdio.rb.
+# Tap : dépôt homebrew-tap partagé avec les autres apps, on ne touche qu'à Casks/clawdio.rb.
 gh repo view "$TAP_REPO" >/dev/null 2>&1 || gh repo create "$TAP_REPO" --public \
-  --description "Homebrew tap for Clawdio" >/dev/null
+  --description "Homebrew tap for NoahSmo apps" >/dev/null
 TAP_DIR="$(mktemp -d -t clawdio-tap)"
 trap 'rm -rf "$TAP_DIR"' EXIT
 gh repo clone "$TAP_REPO" "$TAP_DIR" -- -q 2>/dev/null || git -C "$TAP_DIR" init -q
@@ -48,4 +48,4 @@ git -C "$TAP_DIR" remote get-url origin >/dev/null 2>&1 || git -C "$TAP_DIR" rem
 git -C "$TAP_DIR" push -q -u origin main
 
 echo "Publié : $TAG · sha256 $SHA"
-echo "Installer : brew install --cask $OWNER/clawdio/clawdio"
+echo "Installer : brew install --cask $OWNER/tap/clawdio"

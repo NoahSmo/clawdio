@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installe le build local de Clawdio dans /Applications via un tap Homebrew local (local/clawdio).
-# Pour installer la version publiée : brew install --cask <compte>/clawdio/clawdio (voir README).
+# Pour installer la version publiée : brew install --cask <compte>/tap/clawdio (voir README).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

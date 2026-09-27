@@ -64,9 +64,9 @@ draw.text((560, 150), "Clawdio", font=title, fill=ink)
 draw.text((560, 268), "Claude Code quota and agent status", font=body, fill=soft)
 draw.text((560, 312), "in the Mac notch.", font=body, fill=soft)
 
-chip = [560, 378, 560 + int(draw.textlength("brew install --cask NoahSmo/clawdio/clawdio", font=mono)) + 48, 438]
+chip = [560, 378, 560 + int(draw.textlength("brew install --cask NoahSmo/tap/clawdio", font=mono)) + 48, 438]
 draw.rounded_rectangle(chip, 14, fill=(28, 20, 34))
-draw.text((chip[0] + 24, 398), "brew install --cask NoahSmo/clawdio/clawdio", font=mono, fill=(235, 226, 240))
+draw.text((chip[0] + 24, 398), "brew install --cask NoahSmo/tap/clawdio", font=mono, fill=(235, 226, 240))
 
 card.save("docs/social-preview.png")
 PY

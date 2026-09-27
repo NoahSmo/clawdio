@@ -22,7 +22,7 @@
 ## Install
 
 ```bash
-brew install --cask NoahSmo/clawdio/clawdio
+brew install --cask NoahSmo/tap/clawdio
 ```
 
 Clawdio lands in `/Applications` â€” open it from Launchpad, Spotlight or `open -a Clawdio`.
@@ -134,7 +134,7 @@ To stop the Keychain prompt on every build: `SIGN_IDENTITY="Apple Development: â
 **Publish a release** (`gh` logged in, clean working tree):
 
 ```bash
-./scripts/release.sh 0.3.0   # tag, GitHub Release with the zip, cask updated in NoahSmo/homebrew-clawdio
+./scripts/release.sh 0.3.0   # tag, GitHub Release with the zip, cask updated in NoahSmo/homebrew-tap
 ```
 
 **Add a language**: one table in `Settings/Localization.swift` (a missing key falls back to English, then French).
