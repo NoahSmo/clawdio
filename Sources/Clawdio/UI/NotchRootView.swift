@@ -352,8 +352,9 @@ private struct CollapsedContent: View {
                 }
             }
             .animation(.spring(response: 0.4, dampingFraction: 0.62), value: leftReady)
-            // Le côté extérieur de chaque aile est mangé par la courbure concave du haut (rayon 6–8).
-            .padding(.leading, 12 + growHalf)
+            // Même marge à gauche du donut qu'en dessous : bord vertical de la pastille à 6 (rayon concave du haut),
+            // trait du donut qui déborde de 1,6 de son cadre de 18, donut centré verticalement → h/2 − 3.
+            .padding(.leading, geometry.notchSize.height / 2 - 3 + growHalf)
             .frame(width: wingWidth, alignment: .leading)
 
             Spacer(minLength: 0)
