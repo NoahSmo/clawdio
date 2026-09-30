@@ -55,7 +55,7 @@ enum L10n: String, CaseIterable {
     case fontSystem, fontMono, fontMinecraft
     // Stats
     case today, tokensToday, period30, tokens30, topModel, analyzing, noActivity, partialCost
-    case metricCost, metricTokens, tokensWord
+    case metricCost, metricTokens, tokensWord, projects
     // Quotas
     case quotaSession, quotaWeekly, quotaOpus, quotaSonnet, resetFmt
     case inDaysHours, inHoursMinutes, inMinutes
@@ -116,7 +116,7 @@ struct Strings {
         .today: "Aujourd'hui", .tokensToday: "Tokens auj.", .period30: "30 jours", .tokens30: "Tokens 30 j",
         .topModel: "Top modèle", .analyzing: "Analyse des logs…", .noActivity: "Aucune activité sur 30 jours",
         .partialCost: "Certains modèles sans tarif — coût partiel",
-        .metricCost: "Coût", .metricTokens: "Tokens", .tokensWord: "tokens",
+        .metricCost: "Coût", .metricTokens: "Tokens", .tokensWord: "tokens", .projects: "Projets",
         .quotaSession: "Session", .quotaWeekly: "Semaine", .quotaOpus: "Opus", .quotaSonnet: "Sonnet",
         .resetFmt: "reset %@",
         .inDaysHours: "dans %d j %d h", .inHoursMinutes: "dans %d h %02d", .inMinutes: "dans %d min",
@@ -149,7 +149,7 @@ struct Strings {
         .today: "Today", .tokensToday: "Tokens today", .period30: "30 days", .tokens30: "Tokens 30 d",
         .topModel: "Top model", .analyzing: "Analyzing logs…", .noActivity: "No activity in 30 days",
         .partialCost: "Some models lack pricing — cost is partial",
-        .metricCost: "Cost", .metricTokens: "Tokens", .tokensWord: "tokens",
+        .metricCost: "Cost", .metricTokens: "Tokens", .tokensWord: "tokens", .projects: "Projects",
         .quotaSession: "Session", .quotaWeekly: "Weekly", .quotaOpus: "Opus", .quotaSonnet: "Sonnet",
         .resetFmt: "resets %@",
         .inDaysHours: "in %dd %dh", .inHoursMinutes: "in %dh %02d", .inMinutes: "in %d min",
@@ -182,7 +182,7 @@ struct Strings {
         .today: "Hoy", .tokensToday: "Tokens hoy", .period30: "30 días", .tokens30: "Tokens 30 d",
         .topModel: "Modelo top", .analyzing: "Analizando registros…", .noActivity: "Sin actividad en 30 días",
         .partialCost: "Algunos modelos sin tarifa — coste parcial",
-        .metricCost: "Coste", .metricTokens: "Tokens", .tokensWord: "tokens",
+        .metricCost: "Coste", .metricTokens: "Tokens", .tokensWord: "tokens", .projects: "Proyectos",
         .quotaSession: "Sesión", .quotaWeekly: "Semana", .quotaOpus: "Opus", .quotaSonnet: "Sonnet",
         .resetFmt: "reinicio %@",
         .inDaysHours: "en %d d %d h", .inHoursMinutes: "en %d h %02d", .inMinutes: "en %d min",
@@ -215,7 +215,7 @@ struct Strings {
         .today: "Heute", .tokensToday: "Tokens heute", .period30: "30 Tage", .tokens30: "Tokens 30 T",
         .topModel: "Top-Modell", .analyzing: "Protokolle werden analysiert…", .noActivity: "Keine Aktivität in 30 Tagen",
         .partialCost: "Einige Modelle ohne Preis — Kosten unvollständig",
-        .metricCost: "Kosten", .metricTokens: "Tokens", .tokensWord: "Tokens",
+        .metricCost: "Kosten", .metricTokens: "Tokens", .tokensWord: "Tokens", .projects: "Projekte",
         .quotaSession: "Sitzung", .quotaWeekly: "Woche", .quotaOpus: "Opus", .quotaSonnet: "Sonnet",
         .resetFmt: "Reset %@",
         .inDaysHours: "in %d T %d Std", .inHoursMinutes: "in %d Std %02d", .inMinutes: "in %d Min",

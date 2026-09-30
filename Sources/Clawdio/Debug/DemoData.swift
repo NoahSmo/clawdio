@@ -57,7 +57,21 @@ enum DemoData {
             return ModelTotal(model: model, family: family, isPriced: true,
                               cost: running.cost, tokens: running.tokens, output: running.output)
         }.sorted { $0.cost > $1.cost }
-        return UsageStats(dayTotals: days, points: points, models: models)
+        let periodCost = days.reduce(0) { $0 + $1.cost }
+        let periodTokens = days.reduce(0) { $0 + $1.totalTokens }
+        let todayCost = days.last?.cost ?? 0
+        let shares: [(name: String, share: Double, age: TimeInterval)] = [
+            ("clawdio", 0.46, 40), ("billing-api", 0.31, 6 * 60), ("infra", 0.17, 52 * 60), ("dotfiles", 0.06, 3 * 86400),
+        ]
+        let projects = shares.map { item -> ProjectTotal in
+            var project = ProjectTotal(key: item.name, name: item.name)
+            project.cost = periodCost * item.share
+            project.tokens = Int(Double(periodTokens) * item.share)
+            project.todayCost = item.age < 86400 ? todayCost * item.share : 0
+            project.lastActive = Date.now.addingTimeInterval(-item.age)
+            return project
+        }
+        return UsageStats(dayTotals: days, points: points, models: models, projects: projects)
     }
 
     private static func demoSessions() -> [AgentSession] {

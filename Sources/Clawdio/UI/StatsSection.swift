@@ -29,6 +29,9 @@ enum Fmt {
 
 /// Teintes d'orange Claude : le modèle le plus utilisé est le plus soutenu, les suivants s'éclaircissent.
 enum ModelPalette {
+    /// Orange Claude principal (aussi utilisé hors graphique, ex. barres par projet).
+    static var accent: Color { shades[0] }
+
     private static let shades: [Color] = [
         Color(red: 0.79, green: 0.36, blue: 0.20),
         Color(red: 0.89, green: 0.56, blue: 0.40),
@@ -249,18 +252,29 @@ struct ChartNote: View {
                 }
             }
             Spacer(minLength: 0)
-            HStack(spacing: 8) {
-                ForEach(ChartMetric.allCases, id: \.self) { item in
-                    Text(item == .cost ? t(.metricCost) : t(.metricTokens))
-                        .foregroundStyle(.white.opacity(metric == item ? 0.95 : 0.4))
-                        .contentShape(Rectangle())
-                        .onTapGesture { withAnimation(.snappy(duration: 0.3)) { metric = item } }
-                }
-            }
+            MetricToggle(metric: $metric)
         }
         .font(.system(size: 10, weight: .medium))
         .lineLimit(1)
         .frame(height: ExpandedLayout.noteHeight)
+    }
+}
+
+/// Sélecteur Coût / Tokens (partagé entre le graphique et la page projets).
+struct MetricToggle: View {
+    @Binding var metric: ChartMetric
+    @Environment(\.t) private var t
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(ChartMetric.allCases, id: \.self) { item in
+                Text(item == .cost ? t(.metricCost) : t(.metricTokens))
+                    .foregroundStyle(.white.opacity(metric == item ? 0.95 : 0.4))
+                    .contentShape(Rectangle())
+                    .onTapGesture { withAnimation(.snappy(duration: 0.3)) { metric = item } }
+            }
+        }
+        .font(.system(size: 10, weight: .medium))
     }
 }
 

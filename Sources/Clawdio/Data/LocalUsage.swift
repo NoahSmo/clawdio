@@ -8,6 +8,7 @@ struct TokenRecord {
     let date: Date
     let day: Date          // début du jour local, calculé une seule fois au parsing (Calendar coûte cher)
     let modelID: String
+    var project = ""       // dossier du projet sous `projects/` (clé stable), renseigné par le scanner
     var input = 0
     var output = 0
     var cacheRead = 0
@@ -54,10 +55,21 @@ struct ModelTotal: Identifiable, Equatable {
     var id: String { model }
 }
 
+struct ProjectTotal: Identifiable, Equatable {
+    let key: String        // dossier sous `projects/`
+    let name: String       // nom lisible (dernier composant du cwd)
+    var cost = 0.0
+    var tokens = 0
+    var todayCost = 0.0
+    var lastActive = Date.distantPast
+    var id: String { key }
+}
+
 struct UsageStats: Equatable {
     let dayTotals: [DayTotal]     // toujours `days` entrées, jours vides inclus
     let points: [UsagePoint]      // coût/tokens par jour × modèle
     let models: [ModelTotal]      // triés par coût décroissant
+    let projects: [ProjectTotal]  // triés par coût décroissant
 
     var isEmpty: Bool { models.isEmpty }
     var topModel: ModelTotal? { models.first }
@@ -69,20 +81,22 @@ struct UsageStats: Equatable {
 
 #if DEBUG
     /// Données d'exemple pour les captures du README (voir `DemoData`). Debug uniquement.
-    init(dayTotals: [DayTotal], points: [UsagePoint], models: [ModelTotal]) {
+    init(dayTotals: [DayTotal], points: [UsagePoint], models: [ModelTotal], projects: [ProjectTotal]) {
         self.dayTotals = dayTotals
         self.points = points
         self.models = models
+        self.projects = projects
     }
 #endif
 
-    init(records: [TokenRecord], now: Date, days: Int, calendar: Calendar) {
+    init(records: [TokenRecord], projectNames: [String: String] = [:], now: Date, days: Int, calendar: Calendar) {
         let today = calendar.startOfDay(for: now)
         let dayList = (0..<days).reversed().compactMap { calendar.date(byAdding: .day, value: -$0, to: today) }
 
         var perDay = Dictionary(uniqueKeysWithValues: dayList.map { ($0, DayTotal(day: $0)) })
         var perPoint: [String: UsagePoint] = [:]
         var perModel: [String: ModelTotal] = [:]
+        var perProject: [String: ProjectTotal] = [:]
 
         for record in records {
             let day = record.day
@@ -107,10 +121,19 @@ struct UsageStats: Equatable {
             model.tokens += total
             model.output += record.output
             perModel[info.displayName] = model
+
+            var project = perProject[record.project]
+                ?? ProjectTotal(key: record.project, name: projectNames[record.project] ?? ClaudePaths.projectName(fromDirectory: record.project))
+            project.cost += cost
+            project.tokens += total
+            if day == today { project.todayCost += cost }
+            project.lastActive = max(project.lastActive, record.date)
+            perProject[record.project] = project
         }
 
         dayTotals = dayList.compactMap { perDay[$0] }
         models = perModel.values.sorted { $0.cost > $1.cost }
+        projects = perProject.values.sorted { $0.cost > $1.cost }
 
         // Un point à 0 pour les jours vides, sinon l'axe X du graphique saute ces jours.
         var points = Array(perPoint.values)
@@ -133,6 +156,7 @@ actor LogScanner {
         let modified: Date
         let size: Int
         let records: [TokenRecord]
+        let cwd: String?   // premier `cwd` rencontré : donne le nom lisible du projet
     }
 
     private var cache: [URL: Cached] = [:]
@@ -154,6 +178,7 @@ actor LogScanner {
 
         var seen = Set<URL>()
         var merged: [String: TokenRecord] = [:]
+        var projectNames: [String: String] = [:]
 
         for root in roots {
             guard let walker = FileManager.default.enumerator(
@@ -162,6 +187,7 @@ actor LogScanner {
                 options: [.skipsHiddenFiles]
             ) else { continue }
 
+            let rootDepth = root.standardizedFileURL.pathComponents.count
             for case let url as URL in walker where url.pathExtension == "jsonl" {
                 guard
                     let values = try? url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey]),
@@ -171,15 +197,25 @@ actor LogScanner {
                 let size = values.fileSize ?? 0
                 seen.insert(url)
 
-                let records: [TokenRecord]
+                // projects/<projet>/<session>.jsonl, ou plus bas pour les sous-agents : le projet est toujours le
+                // premier dossier sous la racine.
+                let components = url.standardizedFileURL.pathComponents
+                let project = components.count > rootDepth + 1 ? components[rootDepth] : ""
+
+                let entry: Cached
                 if let hit = cache[url], hit.modified == modified, hit.size == size {
-                    records = hit.records
+                    entry = hit
                 } else {
-                    records = parse(url)
-                    cache[url] = Cached(modified: modified, size: size, records: records)
+                    let (records, cwd) = parse(url)
+                    entry = Cached(modified: modified, size: size, records: records, cwd: cwd)
+                    cache[url] = entry
+                }
+                if projectNames[project] == nil, let cwd = entry.cwd, !cwd.isEmpty {
+                    projectNames[project] = URL(fileURLWithPath: cwd).lastPathComponent
                 }
 
-                for record in records {
+                for var record in entry.records {
+                    record.project = project
                     if var existing = merged[record.key] {
                         existing.absorb(record)
                         merged[record.key] = existing
@@ -191,7 +227,7 @@ actor LogScanner {
         }
 
         cache = cache.filter { seen.contains($0.key) }
-        return UsageStats(records: Array(merged.values), now: now, days: days, calendar: calendar)
+        return UsageStats(records: Array(merged.values), projectNames: projectNames, now: now, days: days, calendar: calendar)
     }
 
     // MARK: Parsing
@@ -226,14 +262,16 @@ actor LogScanner {
         }
         let requestId: String?
         let timestamp: String?
+        let cwd: String?
         let message: Message?
     }
 
     private static let needle = Array("\"output_tokens\"".utf8)
 
-    private func parse(_ url: URL) -> [TokenRecord] {
-        guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return [] }
+    private func parse(_ url: URL) -> (records: [TokenRecord], cwd: String?) {
+        guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return ([], nil) }
         var out: [TokenRecord] = []
+        var cwd: String?
 
         // Une ligne = un JSON. Recherche mémoire (memchr/memmem) : on ne décode que les lignes
         // qui portent un usage, ce qui évite de parser des centaines de Mo de tool results.
@@ -260,6 +298,7 @@ actor LogScanner {
                     let stamp = entry.timestamp,
                     let date = isoFraction.date(from: stamp) ?? isoPlain.date(from: stamp)
                 else { continue }
+                if cwd == nil { cwd = entry.cwd }
 
                 var record = TokenRecord(
                     key: "\(id)|\(entry.requestId ?? "")",
@@ -279,7 +318,7 @@ actor LogScanner {
                 out.append(record)
             }
         }
-        return out
+        return (out, cwd)
     }
 }
 
@@ -294,5 +333,10 @@ enum ClaudePaths {
         dirs.append(home.appending(path: ".claude/projects"))
         dirs.append(home.appending(path: ".config/claude/projects"))
         return dirs
+    }
+
+    /// Nom de repli quand aucun `cwd` n'est connu : "-Users-noah-Dev-mon-app" → "app" (le chemin encodé est ambigu).
+    static func projectName(fromDirectory name: String) -> String {
+        name.split(separator: "-").last.map(String.init) ?? name
     }
 }

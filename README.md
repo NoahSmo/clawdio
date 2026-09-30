@@ -45,7 +45,7 @@ The app is ad-hoc signed and not notarized by Apple: the cask strips the quarant
 - a **halo** (tan → lavender → violet) outlines the pill while an agent is waiting for you (can be turned off);
 - a **sound** when an agent finishes (Glass) or asks for permission (Funk).
 
-**On click**, the panel opens: session and weekly quotas, cost and tokens for today and the last 30 days, per-day bars stacked by model (Cost / Tokens toggle), and your **conversation history** (list, then a live message thread). Click outside, hit the chevron or press Escape to close.
+**On click**, the panel opens: session and weekly quotas, cost and tokens for today and the last 30 days, per-day bars stacked by model (Cost / Tokens toggle), a **per-project breakdown** of cost and tokens (folder button), and your **conversation history** (list, then a live message thread). Click outside, hit the chevron or press Escape to close.
 
 **No notch?** A simulated pill sits flush against the menu bar.
 

@@ -481,6 +481,8 @@ private struct ExpandedContent: View {
             ThreadPage(store: sessions, sessionID: id)
         case .settings:
             SettingsPage(settings: settings, sessions: sessions)
+        case .projects:
+            ProjectsPage(stats: local.stats, state: state)
         }
     }
 
@@ -661,6 +663,10 @@ private struct TopBand: View {
             // On laisse libre la zone de l'encoche matérielle.
             Spacer(minLength: state.geometry.notchSize.width + 24)
             HStack(spacing: 2) {
+                iconButton("folder") {
+                    withAnimation(.snappy(duration: 0.3)) { state.page = state.page == .projects ? .stats : .projects }
+                }
+                .help(t(.projects))
                 iconButton("gearshape") {
                     withAnimation(.snappy(duration: 0.3)) { state.page = state.page == .settings ? .stats : .settings }
                 }
@@ -706,7 +712,7 @@ private struct TopBand: View {
     private var backTarget: PopupPage? {
         switch state.page {
         case .stats: nil
-        case .history, .settings: .stats
+        case .history, .settings, .projects: .stats
         case .thread: .history
         }
     }

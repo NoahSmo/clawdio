@@ -7,6 +7,7 @@ enum PopupPage: Hashable {
     case history
     case thread(String)   // id de la session
     case settings
+    case projects
 }
 
 enum ChartMetric: String, CaseIterable {

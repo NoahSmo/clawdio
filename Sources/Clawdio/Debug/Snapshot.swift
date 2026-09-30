@@ -51,6 +51,7 @@ enum Snapshot {
             ("demo-collapsed", .collapsed, .stats, .waitingReply),
             ("demo-expanded", .expanded, .stats, .waitingReply),
             ("demo-history", .expanded, .history, .waitingReply),
+            ("demo-projects", .expanded, .projects, .idle),
         ] : [
             ("collapsed-idle", .collapsed, .stats, .idle),
             ("collapsed-reply", .collapsed, .stats, .waitingReply),
@@ -60,6 +61,7 @@ enum Snapshot {
             ("expanded-stats", .expanded, .stats, .waitingReply),
             ("expanded-history", .expanded, .history, .waitingReply),
             ("expanded-settings", .expanded, .settings, .waitingReply),
+            ("expanded-projects", .expanded, .projects, .idle),
             ("expanded-charthover", .expanded, .stats, .waitingReply),
         ]
         for (name, mode, page, need) in shots {

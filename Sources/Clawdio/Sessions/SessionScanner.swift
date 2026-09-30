@@ -139,7 +139,7 @@ actor SessionScanner {
             }
 
             let title = summary.title ?? firstPrompt(of: file.url) ?? "" // vide → la vue affiche "Conversation" localisé
-            let project = summary.project ?? Self.projectName(fromDirectory: file.url.deletingLastPathComponent().lastPathComponent)
+            let project = summary.project ?? ClaudePaths.projectName(fromDirectory: file.url.deletingLastPathComponent().lastPathComponent)
             var pending: String?
             if case .toolPending(let name) = summary.kind { pending = name }
 
@@ -296,10 +296,6 @@ actor SessionScanner {
     private static func oneLine(_ text: String, limit: Int) -> String {
         let flat = text.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespaces)
         return flat.count > limit ? String(flat.prefix(limit)) + "…" : flat
-    }
-
-    private static func projectName(fromDirectory name: String) -> String {
-        name.split(separator: "-").last.map(String.init) ?? name
     }
 
     // MARK: Historique d'une conversation

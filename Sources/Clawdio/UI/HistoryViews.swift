@@ -161,7 +161,7 @@ struct ScrollIfLive<Content: View>: View {
 
     var body: some View {
         if Reveal.instant {
-            content.frame(maxHeight: .infinity, alignment: .top).clipped()
+            content.frame(minHeight: 0, maxHeight: .infinity, alignment: .top).clipped()
         } else {
             ScrollView(.vertical) { content }.scrollIndicators(.hidden)
         }
