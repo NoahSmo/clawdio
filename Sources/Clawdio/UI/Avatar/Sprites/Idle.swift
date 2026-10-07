@@ -31,7 +31,7 @@ extension AvatarSprites {
     }
 
     private static func standing(_ extras: PixelGrid...) -> SpriteFrame {
-        SpriteFrame(image: PixelGrid.layered([Body.trunk, Legs.stand, Arms.leftDown, Arms.rightDown] + extras).makeImage())
+        pose([Body.trunk, Legs.stand, Arms.leftDown, Arms.rightDown] + extras)
     }
 
     // MARK: Poses

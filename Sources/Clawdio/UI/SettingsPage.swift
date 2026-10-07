@@ -28,8 +28,8 @@ struct SettingsPage: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.6))
                 HStack(spacing: 8) {
-                    ForEach(AvatarCharacter.allCases) { option in
-                        avatarChip(option)
+                    ForEach(AvatarFamily.allCases) { family in
+                        AvatarFamilyCard(family: family, settings: settings)
                     }
                 }
             }
@@ -72,28 +72,6 @@ struct SettingsPage: View {
         )
         .contentShape(Rectangle())
         .onTapGesture { withAnimation(.snappy(duration: 0.25)) { settings.setTimeFont(option) } }
-    }
-
-    /// Même carte que les polices : le personnage en taille notch, immobile, et son nom.
-    private func avatarChip(_ option: AvatarCharacter) -> some View {
-        let selected = settings.avatar == option
-        let cast = option.repertoire
-        return VStack(spacing: 4) {
-            // Le duo, bien plus large, passe à l'échelle 1 pour tenir dans la carte.
-            AvatarCanvas(frame: cast.stand, scale: cast.points(CGFloat(cast.width) * cast.pixelScale > 24 ? 1 : 1.5), shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
-            Text(option.name)
-                .font(.system(size: 9.5, weight: .medium))
-                .foregroundStyle(.white.opacity(selected ? 0.9 : 0.45))
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 58)
-        .background(.white.opacity(selected ? 0.14 : 0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(.white.opacity(selected ? 0.5 : 0), lineWidth: 1)
-        )
-        .contentShape(Rectangle())
-        .onTapGesture { withAnimation(.snappy(duration: 0.25)) { settings.setAvatar(option) } }
     }
 
     private func toggleRow(_ title: String, isOn: Bool, set: @escaping (Bool) -> Void) -> some View {
@@ -176,5 +154,85 @@ struct SettingsPage: View {
             }
         }
         .frame(height: 24)
+    }
+}
+
+/// Carte d'un univers, même style que les polices : une variante à la fois, une petite flèche au-dessus et une en
+/// dessous de l'avatar pour passer à la précédente ou à la suivante (en boucle) — ce qui la choisit aussitôt. Un clic sur la carte choisit
+/// la variante affichée.
+private struct AvatarFamilyCard: View {
+    let family: AvatarFamily
+    let settings: AppSettings
+    @State private var shown: AvatarCharacter?
+    /// Sens du dernier changement : la nouvelle variante arrive par le bas (suivante) ou par le haut (précédente).
+    @State private var forward = true
+
+    private static let height: CGFloat = 58
+    private var selected: Bool { settings.avatar.family == family }
+    private var current: AvatarCharacter { shown ?? (selected ? settings.avatar : family.variants[0]) }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            arrow("chevron.compact.up", step: -1)
+            page(current)
+                .id(current)
+                .transition(.push(from: forward ? .bottom : .top))
+                .frame(height: Self.height)
+                .clipped()
+            arrow("chevron.compact.down", step: 1)
+        }
+        .frame(maxWidth: .infinity)
+        .background(.white.opacity(selected ? 0.14 : 0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(.white.opacity(selected ? 0.5 : 0), lineWidth: 1)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture { choose(current) }
+    }
+
+    /// Le personnage en taille notch, immobile, et son nom. Le duo, bien plus large, passe à l'échelle 1.
+    private func page(_ option: AvatarCharacter) -> some View {
+        let cast = option.repertoire
+        let isCurrent = settings.avatar == option
+        return VStack(spacing: 4) {
+            AvatarCanvas(frame: cast.stand, scale: cast.points(CGFloat(cast.width) * cast.pixelScale > 24 ? 1 : 1.5), shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
+            Text(option.name)
+                .font(.system(size: 9.5, weight: .medium))
+                .foregroundStyle(.white.opacity(isCurrent ? 0.9 : 0.45))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 6)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: Self.height)
+    }
+
+    /// Flèche au-dessus ou en dessous de l'avatar ; invisible (place gardée) quand l'univers n'a qu'une variante,
+    /// pour que toutes les cartes restent alignées.
+    private func arrow(_ symbol: String, step: Int) -> some View {
+        let active = family.variants.count > 1
+        return Image(systemName: symbol)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(.white.opacity(active ? 0.55 : 0))
+            .frame(maxWidth: .infinity)
+            .frame(height: 16)
+            .contentShape(Rectangle())
+            .onTapGesture { if active { move(step) } }
+            .allowsHitTesting(active)
+    }
+
+    private func move(_ step: Int) {
+        let variants = family.variants
+        let index = variants.firstIndex(of: current) ?? 0
+        let next = variants[(index + step + variants.count) % variants.count]
+        forward = step > 0
+        withAnimation(.snappy(duration: 0.3)) { shown = next }
+        choose(next)
+    }
+
+    private func choose(_ variant: AvatarCharacter) {
+        withAnimation(.snappy(duration: 0.25)) { settings.setAvatar(variant) }
     }
 }

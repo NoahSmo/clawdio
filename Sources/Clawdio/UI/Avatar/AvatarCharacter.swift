@@ -1,13 +1,16 @@
 import CoreGraphics
 import SwiftUI
 
-/// Personnage de l'avatar, choisi dans les Paramètres.
+/// Personnage de l'avatar, choisi dans les Paramètres. Chaque cas est une variante d'une `AvatarFamily`.
+/// La valeur brute est enregistrée dans les préférences : ne pas renommer.
 enum AvatarCharacter: String, CaseIterable, Identifiable {
     case clawd  // la mascotte de Claude Code
     case rocky  // l'Éridien de « Projet Hail Mary » (Andy Weir)
     case rockySuit  // le même, en combinaison de sortie
     case rockyBubble  // le même, dans sa bulle de verre
     case rockyGrace  // Rocky et Grace, qui se disent les répliques du film
+    case creeper, steve, enderman, pig  // Minecraft
+    case totoro, chuTotoro, noFace, soot, calcifer, jiji  // Studio Ghibli
 
     var id: String { rawValue }
 
@@ -19,7 +22,21 @@ enum AvatarCharacter: String, CaseIterable, Identifiable {
         case .rockySuit: "Rocky EVA"
         case .rockyBubble: "Rocky bulle"
         case .rockyGrace: "Rocky & Grace"
+        case .creeper: "Creeper"
+        case .steve: "Steve"
+        case .enderman: "Enderman"
+        case .pig: "Cochon"
+        case .totoro: "Totoro"
+        case .chuTotoro: "Chu-Totoro"
+        case .noFace: "Sans-Visage"
+        case .soot: "Noiraude"
+        case .calcifer: "Calcifer"
+        case .jiji: "Jiji"
         }
+    }
+
+    var family: AvatarFamily {
+        AvatarFamily.allCases.first { $0.variants.contains(self) }!
     }
 
     var repertoire: AvatarRepertoire {
@@ -29,6 +46,46 @@ enum AvatarCharacter: String, CaseIterable, Identifiable {
         case .rockySuit: .rockySuit
         case .rockyBubble: .rockyBubble
         case .rockyGrace: .rockyGrace
+        case .creeper: Skinned.creeper
+        case .steve: Skinned.steve
+        case .enderman: Skinned.enderman
+        case .pig: Skinned.pig
+        case .totoro: Skinned.totoro
+        case .chuTotoro: Skinned.chuTotoro
+        case .noFace: Skinned.noFace
+        case .soot: Skinned.soot
+        case .calcifer: Skinned.calcifer
+        case .jiji: Skinned.jiji
+        }
+    }
+
+    /// Répertoires des personnages adaptés, habillés une seule fois (à la première lecture).
+    private enum Skinned {
+        static let creeper = MinecraftSkins.creeper.repertoire
+        static let steve = MinecraftSkins.steve.repertoire
+        static let enderman = MinecraftSkins.enderman.repertoire
+        static let pig = MinecraftSkins.pig.repertoire
+        static let totoro = GhibliSkins.totoro.repertoire
+        static let chuTotoro = GhibliSkins.chuTotoro.repertoire
+        static let noFace = GhibliSkins.noFace.repertoire
+        static let soot = GhibliSkins.soot.repertoire
+        static let calcifer = GhibliSkins.calcifer.repertoire
+        static let jiji = GhibliSkins.jiji.repertoire
+    }
+}
+
+/// Univers d'un personnage : une carte dans les Paramètres, dont les flèches font défiler les variantes.
+enum AvatarFamily: String, CaseIterable, Identifiable {
+    case clawd, rocky, minecraft, ghibli
+
+    var id: String { rawValue }
+
+    var variants: [AvatarCharacter] {
+        switch self {
+        case .clawd: [.clawd]
+        case .rocky: [.rocky, .rockySuit, .rockyBubble, .rockyGrace]
+        case .minecraft: [.creeper, .steve, .enderman, .pig]
+        case .ghibli: [.totoro, .chuTotoro, .noFace, .soot, .calcifer, .jiji]
         }
     }
 }
@@ -60,6 +117,9 @@ struct AvatarRepertoire {
         return scale
     }
     let shadow: CGImage
+    /// Cadence du scintillement continu des images (`SpriteFrame.flicker`) ; `nil` = images fixes, et l'avatar ne
+    /// coûte rien au repos.
+    var flickerFPS: Double? = nil
     /// Dessiné par-dessus, fixe comme l'ombre (la bulle de Rocky) : ne suit pas les sauts.
     var overlay: CGImage? = nil
     let stand: SpriteFrame
@@ -71,10 +131,12 @@ struct AvatarRepertoire {
     let hop, wave, cheer, raiseHand, push, fallAsleep, snore, wake: SpriteClip
     /// Gestes de repos tirés au sort : poids normal, puis poids une fois somnolent (voir `AvatarDirector`).
     let idle: [(clip: SpriteClip, weight: Double, drowsy: Double)]
+    /// Il se demande quelque chose (attente de ta réponse) ; `nil` = un geste de repos à la place (Rocky).
+    var wonder: SpriteClip? = nil
 
     /// Tous les clips, pour la planche contact et la page de visualisation.
     var allClips: [SpriteClip] {
-        [hop, wave, cheer, raiseHand, push] + idle.map(\.clip) + [fallAsleep, snore, wake]
+        [hop, wave, cheer, raiseHand, push] + idle.map(\.clip) + [wonder].compactMap { $0 } + [fallAsleep, snore, wake]
             + AvatarActivity.allCases.map(activityClip)
     }
 }
@@ -97,7 +159,8 @@ extension AvatarRepertoire {
             (AvatarSprites.yawn, 4, 15),
             (AvatarSprites.stretch, 7, 7),
             (AvatarSprites.find, 5, 5),
-        ]
+        ],
+        wonder: AvatarSprites.wonder
     )
 
     static let rocky = AvatarRepertoire(RockySprites(.natural))

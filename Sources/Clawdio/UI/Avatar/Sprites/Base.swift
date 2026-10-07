@@ -11,7 +11,11 @@ enum AvatarSprites {
     }
 
     static func pose(_ layers: PixelGrid...) -> SpriteFrame {
-        SpriteFrame(image: PixelGrid.layered(layers).makeImage())
+        pose(layers)
+    }
+
+    static func pose(_ layers: [PixelGrid]) -> SpriteFrame {
+        SpriteFrame(image: PixelGrid.layered(layers).makeImage(), layers: layers)
     }
 
     // MARK: Calques
@@ -210,11 +214,12 @@ enum AvatarSprites {
         case .attention: handUp
         case .pushing: pushApart
         case .working(let activity): activityRest(activity)
-        case .idle, .waiting: stand
+        case .waiting: wonderRest
+        case .idle: stand
         }
     }
 
     static func with(_ frame: SpriteFrame, dx: Int = 0, dy: Int = 0, hold: Int = 1) -> SpriteFrame {
-        SpriteFrame(image: frame.image, dx: dx, dy: dy, hold: hold)
+        SpriteFrame(image: frame.image, dx: dx, dy: dy, hold: hold, layers: frame.layers, flicker: frame.flicker)
     }
 }

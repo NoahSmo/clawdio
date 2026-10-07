@@ -21,12 +21,12 @@ enum AvatarDirector {
             // Boucle serrée, sans pause : il pousse tant que dure la naissance de la pastille.
             Beat(clip: cast.push)
         case .waiting:
-            // Il a fini et attend ta réponse : il fête ça une fois (« Amaze ! »), puis t'appelle d'un coucou de
-            // temps en temps, entre deux gestes de repos. Un coucou toutes les 3 s tournait à l'agitation.
+            // Il a fini et attend ta réponse : il fête ça une fois (« Amaze ! »), puis se demande ce que tu vas
+            // répondre (« ? ») et t'appelle d'un coucou, en alternance. Un coucou toutes les 3 s tournait à l'agitation.
             if round == 1 {
                 Beat(before: 0.2...0.4, clip: cast.cheer, after: 3...4)
             } else {
-                Beat(clip: round % 2 == 0 ? cast.wave : idleGesture(cast, drowsy: false), after: 5...8)
+                Beat(clip: round % 2 == 0 ? cast.wave : cast.wonder ?? idleGesture(cast, drowsy: false), after: 5...8)
             }
         case .attention:
             // Besoin d'une autorisation, plus pressant : main levée en permanence (pose de repos), et des petits

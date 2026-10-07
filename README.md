@@ -41,7 +41,7 @@ The app is ad-hoc signed and not notarized by Apple: the cask strips the quarant
 
 **In the notch**, at rest:
 - on the left, a colored ring (5-hour session quota, green → orange → red) and the time it resets;
-- on the right, the avatar (Clawd by default) and a badge for what the agent needs: sparkle = working · “…” bubble = it replied · orange “!” bubble = permission or question needed;
+- on the right, the avatar (Clawd by default) and a badge for what the agent needs: sparkle = working · “?” thought bubble = it replied and is waiting for you · orange “!” bubble = permission or question needed;
 - a **halo** (tan → lavender → violet) outlines the pill while an agent is waiting for you (can be turned off);
 - a **sound** when an agent finishes (Glass) or asks for permission (Funk).
 
@@ -61,7 +61,7 @@ A 16 × 16 pixel character, seen from above, reacting to the most urgent agent a
 | searching the web (`WebFetch`, `WebSearch`, browser MCP) | spins a globe |
 | delegating to subagents (`Task`, `Agent`) | summons mini Clawds |
 | thinking or writing its answer | looks up, taps a foot |
-| replied, waiting for you | jumps for joy once, then waves now and then |
+| replied, waiting for you | jumps for joy once, then wonders what you'll answer (eyes raised toward a “?” thought bubble), waving now and then |
 | waiting for permission | raises a hand, hops (quickly at first, then spaced out) |
 | nothing going on | blinks, looks around, yawns… and falls asleep after 3 minutes (hover wakes him) |
 
@@ -97,9 +97,19 @@ Prefer an Eridian? Pick another **character** in Settings. Rocky, the rock-shell
 
 The duo is twice as wide as Clawd, so in the notch it's drawn at a smaller scale to fit inside the pill.
 
+### Minecraft
+
+Creeper, Steve, Enderman and Pig, fan-made in a chibi style: the head is the real 8 × 8 in-game face texture, drawn on a canvas with pixels half the size of Clawd's (same space on screen, twice the detail). They're rigged on Clawd's skeleton, so they play all of his animations with his props: Steve and the Creeper blink or squint, the Enderman's purple eyes go dark, and to delegate they summon mini heads of themselves.
+
+### Studio Ghibli
+
+Totoro, Chu-Totoro (the blue one), No-Face, a soot sprite, Calcifer and Jiji, drawn on the same high-resolution canvas and playing all of Clawd's animations. Calcifer is never still: his flames flicker and embers drift up even at rest, on three logs seen end-on with an orange glow on the ground. At rest he also eats, like in *Howl's Moving Castle*: a rasher of bacon he swallows before flaring up with joy, the frying pan Howl puts on his head to fry eggs (he sulks), the eggshell he gobbles afterwards, or a log. No-Face has neither arms nor legs, and when Claude delegates they all call the soot sprites that carry the coal in *Spirited Away*.
+
+In Settings, each universe is one card: the small arrows above and below the avatar switch between its variants.
+
 ### Settings
 
-From the gear in the panel: avatar character (Clawd / Rocky / Rocky EVA / Rocky bulle / Rocky & Grace), clock font (Minecraft / System / Mono), sound, launch at login, notch halo, panel background (Glass / Black), hover reaction (Still / Subtle / Bouncy), and language (Auto / English / Français / Español / Deutsch — “Auto” follows the Mac language, falling back to English).
+From the gear in the panel: avatar character (Clawd, Rocky, Minecraft, Studio Ghibli — the arrows above and below a card's avatar switch its variants), clock font (Minecraft / System / Mono), sound, launch at login, notch halo, panel background (Glass / Black), hover reaction (Still / Subtle / Bouncy), and language (Auto / English / Français / Español / Deutsch — “Auto” follows the Mac language, falling back to English).
 
 ## Data and privacy
 

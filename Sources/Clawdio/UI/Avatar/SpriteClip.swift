@@ -7,6 +7,16 @@ struct SpriteFrame {
     var dx = 0
     var dy = 0
     var hold = 1
+    /// Calques d'origine (dessins de Clawd seulement) : un costume (`AvatarSkin`) les réassemble avec son corps.
+    var layers: [PixelGrid] = []
+    /// Variantes de la même image qui se relaient en continu, même sans clip (les flammes de Calcifer) ; vide = fixe.
+    /// Voir `AvatarRepertoire.flickerFPS`.
+    var flicker: [CGImage] = []
+
+    /// Image à montrer à la phase `phase` du scintillement.
+    func image(phase: Int) -> CGImage {
+        flicker.isEmpty ? image : flicker[phase % flicker.count]
+    }
 }
 
 /// Suite d'images jouée à cadence fixe, sans interpolation : une vraie animation image par image.

@@ -1,5 +1,5 @@
 /// Badges de besoin, en pixel art comme l'avatar (même palette, même échelle) : étincelle = il travaille ·
-/// bulle blanche « … » = il a répondu · bulle orange « ! » = il a besoin de toi. Canevas 12 × 10.
+/// bulle de pensée « ? » = il a répondu et attend ta réponse · bulle orange « ! » = il a besoin de toi. Canevas 12 × 10.
 enum BadgeSprites {
     static let width = 12
     static let height = 10
@@ -8,17 +8,18 @@ enum BadgeSprites {
         SpriteFrame(image: PixelGrid(at: top, rows, width: width, height: height, palette: AvatarPalette.standard).makeImage())
     }
 
+    /// Bulle de pensée : il se demande ce que tu vas répondre. Petits ronds au lieu de la queue d'une bulle de parole.
     static let reply = image([
+        "..WWWWWWWW..",
         ".WWWWWWWWWW.",
+        "WWWWDDDWWWWW",
+        "WWWWWWDWWWWW",
+        "WWWWWDDWWWWW",
         "WWWWWWWWWWWW",
-        "WWWWWWWWWWWW",
-        "WWDDWDDWDDWW",
-        "WWDDWDDWDDWW",
-        "WWWWWWWWWWWW",
-        "WWWWWWWWWWWW",
-        ".WWWWWWWWWW.",
+        ".WWWWDWWWWW.",
+        "..WWWWWWWW..",
         "..WW........",
-        "..W.........",
+        "W...........",
     ])
 
     static let approval = image([

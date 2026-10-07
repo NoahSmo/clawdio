@@ -129,7 +129,7 @@ extension AvatarSprites {
         // Bras avant le livre : ses bords recouvrent le bout des mains, qui le tiennent par-derrière.
         var layers = [Body.trunk, ToolEyes.peek(shift), Legs.stand, ToolLimbs.holdLeft, ToolLimbs.holdRight, Props.book]
         if let page { layers.append(page) }
-        return SpriteFrame(image: PixelGrid.layered(layers).makeImage())
+        return pose(layers)
     }
 
     /// Bras cachés derrière le capot ; changent seulement le regard, le reflet de l'écran et une petite main.

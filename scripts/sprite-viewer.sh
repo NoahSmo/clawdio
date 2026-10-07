@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Génère la page de visualisation des sprites de l'avatar (build/sprite-viewer.html) depuis le code Swift.
-# ./scripts/sprite-viewer.sh [sortie.html] [clawd|rocky|rockySuit]
+# ./scripts/sprite-viewer.sh [sortie.html] [clawd|rocky|creeper|… (valeur brute d’AvatarCharacter)]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

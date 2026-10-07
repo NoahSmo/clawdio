@@ -57,9 +57,12 @@ struct AvatarView: View {
     }
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / (clip?.fps ?? 12), paused: clip == nil)) { context in
+        // Un personnage qui scintille (Calcifer) se redessine en continu, à sa cadence ; les autres sont gratuits au repos.
+        let flicker = active && !reduceMotion ? cast.flickerFPS : nil
+        TimelineView(.animation(minimumInterval: 1 / max(clip?.fps ?? 0, flicker ?? 0, 1), paused: clip == nil && flicker == nil)) { context in
             let frame = clip?.frame(at: context.date.timeIntervalSince(startedAt)) ?? restFrame
-            AvatarCanvas(frame: frame, scale: cast.points(scale), shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height)
+            let phase = flicker.map { Int(context.date.timeIntervalSinceReferenceDate * $0) } ?? 0
+            AvatarCanvas(frame: frame, scale: cast.points(scale), shadow: cast.shadow, overlay: cast.overlay, width: cast.width, height: cast.height, phase: phase)
         }
         .frame(width: CGFloat(cast.width) * cast.points(scale), height: CGFloat(cast.height) * cast.points(scale))
         // Bulle du côté de celui qui parle, hors du cadre de l'avatar (au-dessus, le popup n'a pas la place).
@@ -199,11 +202,13 @@ struct AvatarCanvas: View {
     var overlay: CGImage?
     var width: Int = AvatarSprites.size
     var height: Int = AvatarSprites.size
+    /// Phase du scintillement (`SpriteFrame.flicker`).
+    var phase = 0
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             PixelImage(image: shadow, scale: scale)
-            PixelImage(image: frame.image, scale: scale)
+            PixelImage(image: frame.image(phase: phase), scale: scale)
                 .offset(x: CGFloat(frame.dx) * scale, y: CGFloat(frame.dy) * scale)
             if let overlay { PixelImage(image: overlay, scale: scale) }
         }
